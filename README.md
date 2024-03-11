@@ -1,1 +1,1 @@
-# Trabalho-pr-tico-de-Extra-o-de-Conhecimento-de-Dados-Biol-gicos
+# Trabalho_prático_de_Extração_de_Conhecimento_de_Dados_Biológicos
