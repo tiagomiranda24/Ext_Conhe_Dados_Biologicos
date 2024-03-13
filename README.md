@@ -10,3 +10,4 @@ O trabalho tem como objetivo a análise do conjunto de dados obtidos a partir do
 
 ### Conjunto de Dados selecionados:
 https://www.cbioportal.org/study/summary?id=bladder_msk_2023
+https://pubmed.ncbi.nlm.nih.gov/37682528/
