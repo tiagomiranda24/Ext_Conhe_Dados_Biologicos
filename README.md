@@ -1,7 +1,7 @@
 ## Trabalho Prático de Extração de Conhecimento de Dados Biológicos - 2023/2024
 
 #### Elementos do Grupo (Grupo 3):
-- Christian Neitzel| PG52526
+- Christian Neitzel | PG52526
 - Diana Silva | PG52532
 - Tiago Miranda | PG54437
 
