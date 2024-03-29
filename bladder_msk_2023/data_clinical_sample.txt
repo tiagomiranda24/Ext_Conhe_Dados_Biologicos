@@ -1,0 +1,531 @@
+#Sample Identifier	Patient Identifier	Sample Class	Oncotree Code	Cancer Type	Cancer Type Detailed	Disease State	Gene Panel	Sample coverage	Tumor Purity	MSI Score	MSI Type	Somatic Status	Age at Which Sequencing was Reported (Years)	TMB (nonsynonymous)
+#A unique sample identifier.	Identifier to uniquely specify a patient.	The sample classification (i.e., tumor, cellline, xenograph).	The assigned Oncotree code of the sample as defined by the Oncotree cancer classification system for precision oncology.	The main cancer type as defined by the Oncotree cancer classification system for precision oncology.	The cancer subtype as defined by the Oncotree cancer classification system for precision oncology.	Disease State	The gene panel or assay used used to perform targeted NGS on the sample.	Sequencing coverage	Proportion of cancer cells in tumor sample.	Microsatellite Instability (MSI) score.	Directly related to MSI Score; Possible values include Stable, Instable, Indeterminate, or Do not report.	Somatic status	Age (in years) at which sequencing was reported	TMB (nonsynonymous)
+#STRING	STRING	STRING	STRING	STRING	STRING	STRING	STRING	NUMBER	NUMBER	NUMBER	STRING	STRING	NUMBER	NUMBER
+#0	0	0	0	1	1	1	1	1	1	1	1	1	0	1
+SAMPLE_ID	PATIENT_ID	SAMPLE_CLASS	ONCOTREE_CODE	CANCER_TYPE	CANCER_TYPE_DETAILED	DISEASE_STATE	GENE_PANEL	SAMPLE_COVERAGE	TUMOR_PURITY	MSI_SCORE	MSI_TYPE	SOMATIC_STATUS	AGE_AT_SEQ_REPORTED_YEARS	TMB_NONSYNONYMOUS
+P-0000096-T01-IM3	P-0000096	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT341	1084	70	0.66	Stable	Matched	63	8.873242405
+P-0000386-T02-IM5	P-0000386	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	169	70	0.37	Stable	Matched	57	5.872318186
+P-0000502-T01-IM3	P-0000502	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT341	684	40	0.26	Stable	Matched	58	8.873242405
+P-0000645-T01-IM3	P-0000645	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT341	767	60	-1	Do not report	Unmatched	71	13.30986361
+P-0000891-T01-IM3	P-0000891	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT341	711	60	0.09	Stable	Matched	80	11.09155301
+P-0001453-T01-IM3	P-0001453	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT341	818	80	0.75	Stable	Matched	85	11.09155301
+P-0001703-T01-IM3	P-0001703	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT341	730	30	21.67	Instable	Matched	79	83.18664754
+P-0001871-T01-IM3	P-0001871	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT341	465	50	0	Stable	Matched	59	5.545776503
+P-0001904-T01-IM3	P-0001904	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT341	384		-1	Do not report	Unmatched	71	5.545776503
+P-0001904-T02-IM5	P-0001904	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	401	20	0.73	Stable	Matched	72	7.829757581
+P-0002029-T01-IM3	P-0002029	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT341	829		0.08	Stable	Matched	83	4.436621202
+P-0002166-T01-IM3	P-0002166	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT341	743	50	0.87	Stable	Matched	82	8.873242405
+P-0002599-T01-IM3	P-0002599	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT341	322	20	0.69	Stable	Matched	38	9.982397705
+P-0002610-T01-IM3	P-0002610	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT341	535	30	0	Stable	Matched	67	4.436621202
+P-0002741-T01-IM3	P-0002741	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT341	676	30	-1	Do not report	Unmatched	75	6.654931804
+P-0002953-T01-IM3	P-0002953	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT341	781	30	0.09	Stable	Matched	67	19.96479541
+P-0003097-T01-IM5	P-0003097	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	440	90	1.31	Stable	Matched	81	5.872318186
+P-0003190-T01-IM5	P-0003190	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	661	20	0	Stable	Matched	68	4.893598488
+P-0003238-T01-IM5	P-0003238	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	600	50	0.78	Stable	Matched	76	13.70207577
+P-0003279-T02-IM6	P-0003279	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	557	30	0.06	Stable	Matched	66	13.83516952
+P-0003352-T01-IM5	P-0003352	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	698	60	0.17	Stable	Matched	68	4.893598488
+P-0003362-T01-IM5	P-0003362	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	593	90	0.32	Stable	Matched	74	25.44671214
+P-0003370-T01-IM5	P-0003370	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	677	10	0.08	Stable	Matched	70	6.851037883
+P-0003388-T01-IM5	P-0003388	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	627	40	0	Stable	Matched	80	9.787196976
+P-0003391-T01-IM5	P-0003391	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	105	30	2.43	Stable	Matched	62	8.808477279
+P-0003396-T01-IM5	P-0003396	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	538	60	0	Stable	Matched	74	14.68079546
+P-0003403-T01-IM5	P-0003403	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	759	60	0.25	Stable	Matched	51	4.893598488
+P-0003408-T01-IM5	P-0003408	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	314	70	0.58	Stable	Matched	50	4.893598488
+P-0003429-T01-IM5	P-0003429	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT410	387	20	0.15	Stable	Matched	67	5.872318186
+P-0003438-T01-IM5	P-0003438	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	692	70	0.32	Stable	Matched	59	5.872318186
+P-0003524-T01-IM5	P-0003524	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	503	30	12.46	Instable	Matched	61	42.084947
+P-0003555-T01-IM5	P-0003555	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	621	60	22.7	Instable	Matched	31	69.48909853
+P-0003561-T01-IM5	P-0003561	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	315	40	0.08	Stable	Matched	75	22.51055305
+P-0003566-T01-IM5	P-0003566	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	394	20	0	Stable	Matched	48	36.21262881
+P-0003677-T01-IM5	P-0003677	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	654	70	0	Stable	Matched	26	0
+P-0003682-T01-IM5	P-0003682	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	454	20	0.17	Stable	Matched	57	7.829757581
+P-0003690-T01-IM5	P-0003690	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	129	60	1.97	Stable	Matched	69	8.808477279
+P-0003823-T01-IM5	P-0003823	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	235	60	2.05	Stable	Matched	69	3.91487879
+P-0003911-T01-IM5	P-0003911	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT410	451	70	0.89	Stable	Matched	69	4.893598488
+P-0004197-T01-IM5	P-0004197	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	710	60	0.85	Stable	Matched	50	4.893598488
+P-0004224-T01-IM5	P-0004224	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	799	80	0	Stable	Matched	55	7.829757581
+P-0004257-T01-IM5	P-0004257	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	1135	70	2.06	Stable	Matched	80	8.808477279
+P-0004257-T02-IM5	P-0004257	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		IMPACT410	638	70	0.47	Stable	Matched	80	8.808477279
+P-0004260-T01-IM5	P-0004260	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	512	20	23.26	Instable	Matched	60	60.68062125
+P-0004330-T01-IM5	P-0004330	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	523	50	4.39	Indeterminate	Matched	85	63.61678035
+P-0004366-T01-IM5	P-0004366	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	759	30	0	Stable	Matched	59	4.893598488
+P-0004367-T01-IM5	P-0004367	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	760	50	0.15	Stable	Matched	71	9.787196976
+P-0004380-T01-IM5	P-0004380	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	200	20	3.8	Indeterminate	Matched	48	25.44671214
+P-0004393-T01-IM5	P-0004393	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	788	30	0.65	Stable	Matched	49	3.91487879
+P-0004419-T01-IM5	P-0004419	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	136	50	0.62	Stable	Matched	70	0.978719698
+P-0004420-T01-IM5	P-0004420	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	258	20	0.36	Stable	Matched	80	4.893598488
+P-0004424-T01-IM5	P-0004424	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	979	70	0.06	Stable	Matched	61	8.808477279
+P-0004426-T01-IM5	P-0004426	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	506	70	0	Stable	Matched	80	5.872318186
+P-0004444-T01-IM5	P-0004444	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	596	30	0	Stable	Matched	57	4.893598488
+P-0004484-T01-IM5	P-0004484	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	272	50	0.95	Stable	Unmatched	63	8.808477279
+P-0004622-T01-IM5	P-0004622	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	356	40	0.39	Stable	Matched	88	6.851037883
+P-0004622-T02-IM5	P-0004622	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	706	40	1.13	Stable	Matched	88	7.829757581
+P-0004688-T01-IM5	P-0004688	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	912	10	1.14	Stable	Matched	42	405.1899548
+P-0004703-T01-IM5	P-0004703	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	802	60	0.35	Stable	Matched	74	11.74463637
+P-0004757-T01-IM5	P-0004757	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	131	40	2.88	Stable	Matched	72	10.76591667
+P-0004762-T01-IM5	P-0004762	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	321	20	0.53	Stable	Matched	76	4.893598488
+P-0004765-T01-IM5	P-0004765	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	827	50	1.36	Stable	Matched	78	10.76591667
+P-0004997-T01-IM5	P-0004997	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	472	60	0	Stable	Matched	65	6.851037883
+P-0005143-T01-IM5	P-0005143	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	542	70	0.25	Stable	Matched	64	6.851037883
+P-0005150-T01-IM5	P-0005150	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	342	60	0	Stable	Matched	74	0.978719698
+P-0005150-T02-IM5	P-0005150	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	841	60	0	Stable	Matched	75	3.91487879
+P-0005225-T01-IM5	P-0005225	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT410	647	30	0.08	Stable	Matched	78	10.76591667
+P-0005232-T01-IM5	P-0005232	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	451	30	0.08	Stable	Matched	69	6.851037883
+P-0005251-T01-IM5	P-0005251	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT410	495	50	0	Stable	Matched	66	10.76591667
+P-0005284-T01-IM5	P-0005284	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	708	50	1.3	Stable	Matched	65	2.936159093
+P-0005284-T02-IM6	P-0005284	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	454	70	0.44	Stable	Matched	68	4.323490475
+P-0005346-T01-IM5	P-0005346	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	504	30	0.08	Stable	Matched	74	26.42543184
+P-0005367-T01-IM5	P-0005367	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	736		0	Stable	Matched	66	8.808477279
+P-0005373-T01-IM5	P-0005373	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	691	20	0	Stable	Matched	68	7.829757581
+P-0005385-T01-IM5	P-0005385	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	736	30	0	Stable	Matched	55	18.59567425
+P-0005424-T01-IM5	P-0005424	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	706	20	0.94	Stable	Matched	60	2.936159093
+P-0005842-T01-IM5	P-0005842	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	836	80	23.72	Instable	Matched	64	40.1275076
+P-0005905-T01-IM5	P-0005905	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	498	10	0.18	Stable	Matched	64	4.893598488
+P-0005966-T01-IM5	P-0005966	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	737	60	0.97	Stable	Matched	73	3.91487879
+P-0006097-T01-IM5	P-0006097	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	703	50	0.6	Stable	Matched	76	6.851037883
+P-0006097-T02-IM6	P-0006097	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	897	20	0.18	Stable	Matched	78	8.64698095
+P-0006142-T01-IM5	P-0006142	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	814	50	0.08	Stable	Matched	56	7.829757581
+P-0006218-T01-IM5	P-0006218	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	159	70	3.17	Indeterminate	Matched	71	6.851037883
+P-0006291-T01-IM5	P-0006291	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	765	70	0.18	Stable	Matched	83	3.91487879
+P-0006429-T01-IM5	P-0006429	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	409	80	0.65	Stable	Matched	57	2.936159093
+P-0006570-T01-IM5	P-0006570	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	662	80	0.28	Stable	Matched	61	2.936159093
+P-0006697-T01-IM5	P-0006697	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	854	60	0.08	Stable	Matched	55	5.872318186
+P-0006902-T01-IM5	P-0006902	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	698	50	0.09	Stable	Matched	45	7.829757581
+P-0006989-T01-IM5	P-0006989	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	707	50	0.25	Stable	Matched	72	10.76591667
+P-0007000-T01-IM5	P-0007000	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	602	30	0.09	Stable	Matched	73	8.808477279
+P-0007224-T01-IM5	P-0007224	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	595		0.58	Stable	Matched	57	3.91487879
+P-0007285-T01-IM5	P-0007285	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	816	70	0.32	Stable	Matched	88	6.851037883
+P-0007682-T01-IM5	P-0007682	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	811	80	1.41	Stable	Matched	70	8.808477279
+P-0007755-T02-IM5	P-0007755	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	848	30	0.07	Do not report	Matched	55	24.46799244
+P-0007966-T01-IM5	P-0007966	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	851	80	0.51	Stable	Matched	47	3.91487879
+P-0008240-T01-IM5	P-0008240	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	581	70	0	Stable	Matched	67	7.829757581
+P-0008336-T01-IM5	P-0008336	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	Metastatic	IMPACT410	822	80	0.45	Stable	Matched	73	3.91487879
+P-0008345-T01-IM5	P-0008345	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	964	80	17.39	Instable	Matched	56	40.1275076
+P-0008532-T01-IM5	P-0008532	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT410	842	50	0.27	Stable	Matched	70	2.936159093
+P-0008834-T01-IM5	P-0008834	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	603	80	0.26	Stable	Matched	79	18.59567425
+P-0008968-T01-IM5	P-0008968	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	564	90	0.09	Stable	Matched	77	1.957439395
+P-0009029-T01-IM5	P-0009029	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	730	30	0.1	Stable	Matched	40	4.893598488
+P-0009101-T01-IM5	P-0009101	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	1138	15	0	Stable	Matched	57	9.787196976
+P-0009263-T01-IM5	P-0009263	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	1150	70	0.26	Stable	Matched	38	23.48927274
+P-0009371-T01-IM5	P-0009371	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	398	70	0.43	Stable	Matched	75	11.74463637
+P-0009876-T01-IM5	P-0009876	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	820	50	0.34	Stable	Matched	65	6.851037883
+P-0010033-T01-IM5	P-0010033	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	873	70	0	Stable	Matched	72	7.829757581
+P-0010079-T03-IM6	P-0010079	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	779	40	1.26	Stable	Matched	75	12.10577333
+P-0010096-T01-IM5	P-0010096	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT410	573	10	0.08	Stable	Matched	60	0
+P-0010096-T02-IM5	P-0010096	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		IMPACT410	924	10	0	Stable	Matched	60	0
+P-0010096-T03-IM6	P-0010096	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	570	10	0.5	Stable	Matched	63	16.4292638
+P-0010103-T01-IM5	P-0010103	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	1090	80	0.24	Stable	Matched	57	6.851037883
+P-0010393-T02-IM6	P-0010393	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	812	80	3.97	Indeterminate	Matched	56	48.42309332
+P-0010582-T01-IM5	P-0010582	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	1073	60	0.34	Stable	Matched	85	17.61695456
+P-0010783-T02-IM6	P-0010783	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	590	50	27.44	Instable	Matched	79	75.22873426
+P-0010803-T01-IM5	P-0010803	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	764	50	13.88	Instable	Matched	86	84.16989399
+P-0010838-T01-IM5	P-0010838	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	1165	85	0.4	Stable	Matched	59	5.872318186
+P-0011187-T01-IM5	P-0011187	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	910	80	0.27	Stable	Matched	68	8.808477279
+P-0011245-T01-IM5	P-0011245	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	818	10	0	Stable	Matched	64	1.957439395
+P-0011345-T01-IM5	P-0011345	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	777	80	30.05	Instable	Matched	70	65.57421974
+P-0011439-T01-IM5	P-0011439	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT410	1337		1.22	Stable	Matched	76	21.53183335
+P-0012045-T02-IM6	P-0012045	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	960	20	0	Stable	Matched	83	3.45879238
+P-0012045-T03-IM6	P-0012045	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	620	50	0.12	Stable	Matched	84	2.594094285
+P-0012183-T01-IM5	P-0012183	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT410	768	80	0	Stable	Matched	76	7.829757581
+P-0012205-T01-IM5	P-0012205	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT410	933	50	1.61	Stable	Matched	73	9.787196976
+P-0012663-T01-IM5	P-0012663	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT410	781	80	0	Stable	Matched	63	26.42543184
+P-0013873-T01-IM5	P-0013873	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT410	955	50	0.07	Do not report	Matched	61	3.91487879
+P-0015186-T01-IM6	P-0015186	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	750	50	0	Do not report	Matched	75	11.24107523
+P-0015186-T02-IM6	P-0015186	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	704	60	0.06	Do not report	Matched	75	10.37637714
+P-0015501-T01-IM6	P-0015501	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	490	40	0.08	Do not report	Matched	68	14.69986761
+P-0015560-T01-IM6	P-0015560	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	658	40	0.12	Do not report	Matched	81	19.88805618
+P-0015766-T01-IM6	P-0015766	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	895	60	1.08	Do not report	Matched	75	13.83516952
+P-0015863-T01-IM6	P-0015863	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	805	80	0.26	Do not report	Matched	48	2.594094285
+P-0015920-T01-IM6	P-0015920	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	731	50	0.49	Do not report	Matched	79	41.50550856
+P-0016254-T01-IM6	P-0016254	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	517	70			Matched	58	6.91758476
+P-0016455-T01-IM6	P-0016455	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	807	40	0	Do not report	Matched	75	6.91758476
+P-0016649-T01-IM6	P-0016649	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	750	60			Matched	63	6.91758476
+P-0016649-T02-IM6	P-0016649	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		IMPACT468	239	10	0	Stable	Matched	66	0
+P-0016826-T01-IM6	P-0016826	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	874	70	1.05	Do not report	Matched	53	3.45879238
+P-0016989-T01-IM6	P-0016989	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	919	60	0	Do not report	Matched	48	2.594094285
+P-0017725-T01-IM6	P-0017725	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	351	70	4.28	Do not report	Matched	82	7.782282855
+P-0018941-T01-IM6	P-0018941	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	683	60	0.21	Stable	Matched	88	6.052886665
+P-0019242-T01-IM6	P-0019242	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	718	70	1.06	Stable	Matched	80	8.64698095
+P-0019517-T01-IM6	P-0019517	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	NMIBC	IMPACT468	538	40	0.07	Stable	Matched	75	19.02335809
+P-0019733-T01-IM6	P-0019733	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	747	60	0.52	Stable	Matched	59	6.91758476
+P-0020121-T01-IM6	P-0020121	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	671	50	0.33	Stable	Matched	78	15.56456571
+P-0020355-T01-IM6	P-0020355	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	585	30	0.16	Stable	Matched	53	12.97047142
+P-0020832-T01-IM6	P-0020832	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	1036	30	0	Stable	Matched	59	11.24107523
+P-0020842-T01-IM6	P-0020842	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	783	40	0.06	Stable	Matched	57	6.052886665
+P-0020877-T01-IM6	P-0020877	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	93	70	0.3	Stable	Matched	73	15.56456571
+P-0020904-T01-IM6	P-0020904	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	693	60	0	Stable	Matched	70	9.511679045
+P-0020914-T01-IM6	P-0020914	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	814	70	0.06	Stable	Matched	50	8.64698095
+P-0020995-T01-IM6	P-0020995	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	871	30	0	Stable	Matched	63	5.18818857
+P-0021005-T01-IM6	P-0021005	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	776	40	0	Stable	Matched	56	6.91758476
+P-0021006-T01-IM6	P-0021006	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	418	70	0.37	Stable	Matched	43	3.45879238
+P-0021013-T01-IM6	P-0021013	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	706	40	0.06	Stable	Matched	72	11.24107523
+P-0021079-T01-IM6	P-0021079	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	617	40	0.07	Stable	Matched	81	9.511679045
+P-0021378-T01-IM6	P-0021378	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	553	50	0.14	Stable	Matched	58	9.511679045
+P-0021605-T01-IM6	P-0021605	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	734	20	0	Stable	Matched	61	6.052886665
+P-0021642-T01-IM6	P-0021642	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	533	50	0.63	Stable	Matched	68	43.23490475
+P-0022124-T01-IM6	P-0022124	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	640	50	0.27	Stable	Matched	61	2.594094285
+P-0022256-T01-IM6	P-0022256	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	494	60	0.22	Stable	Matched	60	9.511679045
+P-0022434-T01-IM6	P-0022434	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	700	50	0.06	Stable	Matched	70	33.7232257
+P-0022520-T01-IM6	P-0022520	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	742	30	20.38	Instable	Matched	48	68.3111495
+P-0022520-T02-IM6	P-0022520	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	697	30	10.98	Instable	Matched	50	59.66416855
+P-0022605-T01-IM6	P-0022605	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	561	70	0.41	Stable	Matched	69	10.37637714
+P-0023001-T01-IM6	P-0023001	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	646	40	0	Stable	Matched	72	5.18818857
+P-0023099-T01-IM6	P-0023099	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	MIBC	IMPACT468	472	40	0.06	Stable	Matched	81	7.782282855
+P-0023174-T01-IM6	P-0023174	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	481	30	0.92	Stable	Matched	68	1.72939619
+P-0023261-T01-IM6	P-0023261	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	583	70	0.33	Stable	Matched	90	15.56456571
+P-0023606-T01-IM6	P-0023606	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	517	90	0.28	Stable	Matched	38	2.594094285
+P-0023716-T01-IM6	P-0023716	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	437	60	0.17	Stable	Matched	71	16.4292638
+P-0023918-T01-IM6	P-0023918	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	186	40	0.21	Stable	Matched	61	2.594094285
+P-0024039-T01-IM6	P-0024039	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	622	40	0	Stable	Matched	52	9.511679045
+P-0024039-T02-IM6	P-0024039	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	486	70	0.17	Stable	Matched	52	11.24107523
+P-0024795-T01-IM6	P-0024795	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	467	30	0	Stable	Matched	71	11.24107523
+P-0025079-T01-IM6	P-0025079	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	275	40	0.13	Stable	Matched	81	2.594094285
+P-0025313-T01-IM6	P-0025313	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	948	30	0	Stable	Matched	82	4.323490475
+P-0025555-T01-IM6	P-0025555	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	764	40	0.65	Stable	Matched	72	6.91758476
+P-0025613-T01-IM6	P-0025613	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	350	30	0.07	Stable	Matched	63	5.18818857
+P-0025959-T01-IM6	P-0025959	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	520	50	0.15	Stable	Matched	77	9.511679045
+P-0026082-T02-IM6	P-0026082	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	639	80	0	Stable	Matched	72	7.782282855
+P-0026207-T01-IM6	P-0026207	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	603	40	0	Stable	Matched	65	12.10577333
+P-0026651-T01-IM6	P-0026651	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	392	50	1.13	Stable	Matched	52	6.052886665
+P-0026783-T01-IM6	P-0026783	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	NMIBC	IMPACT468	627	60	1.91	Stable	Matched	74	2.594094285
+P-0026784-T01-IM6	P-0026784	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	631	50	28.38	Instable	Matched	70	57.07007427
+P-0026839-T01-IM6	P-0026839	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	669	50	0	Stable	Matched	55	3.45879238
+P-0026839-T04-IM6	P-0026839	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	252	20	0.51	Stable	Matched	57	2.594094285
+P-0026839-T05-IM7	P-0026839	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	260	50	2.63	Stable	Matched	58	4.922083419
+P-0026874-T01-IM6	P-0026874	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	727	20	0	Stable	Matched	75	3.45879238
+P-0026970-T01-IM6	P-0026970	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	676	40	3.98	Indeterminate	Matched	62	25.94094285
+P-0027727-T01-IM6	P-0027727	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	513	80	0.5	Stable	Matched	77	5.18818857
+P-0028454-T01-IM6	P-0028454	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	845	30	6.87	Indeterminate	Matched	59	5.18818857
+P-0028679-T01-IM6	P-0028679	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	NMIBC	IMPACT468	542	60	0.15	Stable	Matched	50	7.782282855
+P-0028777-T02-IM6	P-0028777	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	562	30	0.12	Stable	Matched	53	3.45879238
+P-0029228-T01-IM6	P-0029228	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	714	50	0.29	Stable	Matched	61	32.85852761
+P-0030105-T01-IM6	P-0030105	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	239	60	1.42	Stable	Matched	65	15.56456571
+P-0030133-T02-IM7	P-0030133	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	433	20	0.41	Stable	Matched	73	6.562777893
+P-0030348-T01-IM6	P-0030348	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	558	30	0	Stable	Matched	67	9.511679045
+P-0030383-T02-IM6	P-0030383	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	712	50	12.07	Instable	Matched	66	36.31731999
+P-0030394-T01-IM6	P-0030394	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	515	40	0.55	Stable	Matched	81	20.75275428
+P-0030460-T01-IM6	P-0030460	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	826	60	0	Stable	Matched	69	5.18818857
+P-0030508-T01-IM6	P-0030508	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	693	70	0.3	Stable	Matched	73	18.15865999
+P-0030906-T01-IM6	P-0030906	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	677	50	0.44	Stable	Matched	77	9.511679045
+P-0031155-T01-IM6	P-0031155	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	752	10	0	Stable	Matched	57	0.864698095
+P-0031320-T01-IM6	P-0031320	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	338	30	0.22	Stable	Matched	78	8.64698095
+P-0031416-T01-IM6	P-0031416	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	572	60	0.43	Stable	Matched	72	11.24107523
+P-0031555-T01-IM6	P-0031555	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	537	20	0.08	Stable	Matched	53	5.18818857
+P-0031860-T01-IM6	P-0031860	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	658	70	0.48	Stable	Matched	72	59.66416855
+P-0032134-T01-IM6	P-0032134	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	637	70	0.12	Stable	Matched	57	28.53503713
+P-0032184-T01-IM6	P-0032184	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	736	40	0.82	Stable	Matched	38	6.91758476
+P-0032210-T01-IM6	P-0032210	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	721	70	0.12	Stable	Matched	71	6.052886665
+P-0032252-T01-IM6	P-0032252	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	511	60	0.35	Stable	Matched	66	6.91758476
+P-0032432-T01-IM6	P-0032432	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	544	50	0.06	Stable	Matched	43	2.594094285
+P-0033130-T01-IM6	P-0033130	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	638	80	0.11	Stable	Matched	37	26.80564094
+P-0033487-T01-IM6	P-0033487	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	600	80	0.05	Stable	Matched	78	9.511679045
+P-0033799-T01-IM6	P-0033799	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	504	50	0.13	Stable	Matched	77	12.10577333
+P-0033799-T02-IM6	P-0033799	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	413	50	0.13	Stable	Matched	78	10.37637714
+P-0033799-T04-IM6	P-0033799	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	436	10	0	Stable	Matched	78	10.37637714
+P-0033799-T10-IM6	P-0033799	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	861	40	0.46	Stable	Matched	78	14.69986761
+P-0034183-T01-IM6	P-0034183	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	531	60	0	Stable	Matched	39	3.45879238
+P-0034651-T01-IM6	P-0034651	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	724	40	0.21	Stable	Matched	79	7.782282855
+P-0034947-T01-IM6	P-0034947	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	743	20	0	Stable	Matched	88	6.052886665
+P-0035179-T01-IM6	P-0035179	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	509	60	0.06	Stable	Matched	50	7.782282855
+P-0035590-T02-IM6	P-0035590	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	845	60	0.59	Stable	Matched	78	12.10577333
+P-0035613-T01-IM6	P-0035613	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	676	50	0.06	Stable	Matched	74	14.69986761
+P-0035908-T01-IM6	P-0035908	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	609	70	0.29	Stable	Matched	65	9.511679045
+P-0035999-T01-IM6	P-0035999	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	691	20	0.05	Stable	Matched	69	2.594094285
+P-0035999-T02-IM6	P-0035999	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	376	60	0.21	Stable	Matched	69	3.45879238
+P-0035999-T03-IM6	P-0035999	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	751	10	0.05	Stable	Matched	70	3.45879238
+P-0036305-T01-IM6	P-0036305	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	568	20	0	Stable	Matched	28	1.72939619
+P-0036704-T01-IM6	P-0036704	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	546	40	0.17	Stable	Matched	53	13.83516952
+P-0036725-T01-IM6	P-0036725	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	514	60	0.22	Stable	Matched	80	3.45879238
+P-0036725-T02-IM6	P-0036725	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	392	50	0.09	Stable	Matched	81	4.323490475
+P-0036882-T01-IM6	P-0036882	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	760	60	29.54	Instable	Matched	55	35.45262189
+P-0037268-T01-IM6	P-0037268	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	550	50	0.3	Stable	Matched	72	4.323490475
+P-0037307-T01-IM6	P-0037307	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	622	40	0	Stable	Matched	67	2.594094285
+P-0038120-T01-IM6	P-0038120	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	848	50	0.31	Stable	Matched	62	8.64698095
+P-0038253-T01-IM6	P-0038253	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	529	70	0	Stable	Matched	19	0
+P-0038330-T01-IM6	P-0038330	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	799	40	0.64	Stable	Matched	72	20.75275428
+P-0038346-T01-IM6	P-0038346	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	592	60	0.38	Stable	Matched	73	0.864698095
+P-0038500-T01-IM6	P-0038500	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	542	20	0	Stable	Matched	75	3.45879238
+P-0038966-T01-IM6	P-0038966	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	911	70	2.28	Stable	Matched	64	7.782282855
+P-0039109-T01-IM6	P-0039109	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	474	10	0	Stable	Matched	68	2.594094285
+P-0039109-T02-IM6	P-0039109	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	556	80	0.06	Stable	Matched	69	3.45879238
+P-0039119-T01-IM6	P-0039119	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	421	70	0.06	Stable	Matched	44	10.37637714
+P-0039138-T01-IM6	P-0039138	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	771	60	0	Stable	Matched	71	6.91758476
+P-0039181-T01-IM6	P-0039181	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	680	40	0.12	Stable	Matched	75	9.511679045
+P-0039502-T01-IM6	P-0039502	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	719	20	0.06	Stable	Matched	61	10.37637714
+P-0039974-T01-IM6	P-0039974	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	564	50	0.05	Stable	Matched	69	4.323490475
+P-0040105-T01-IM6	P-0040105	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	462	50	0	Stable	Matched	52	17.2939619
+P-0040117-T01-IM6	P-0040117	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	402	10	0	Stable	Matched	83	11.24107523
+P-0040139-T01-IM6	P-0040139	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	732	70	0	Stable	Matched	56	4.323490475
+P-0040204-T01-IM6	P-0040204	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	315	40	1.4	Stable	Matched	74	5.18818857
+P-0040206-T02-IM6	P-0040206	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	274		0.89	Do not report	Matched	76	15.56456571
+P-0040313-T01-IM6	P-0040313	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	670	70	1.33	Stable	Matched	84	16.4292638
+P-0040377-T01-IM6	P-0040377	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	441	70	0.09	Stable	Matched	75	9.511679045
+P-0040411-T01-IM6	P-0040411	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	573	40	0	Stable	Matched	75	6.052886665
+P-0040700-T01-IM6	P-0040700	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	506	40	0.21	Stable	Matched	65	7.782282855
+P-0040946-T01-IM6	P-0040946	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	486	20	0	Stable	Matched	75	10.37637714
+P-0041166-T01-IM6	P-0041166	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	492	40	17.14	Instable	Matched	55	41.50550856
+P-0041253-T01-IM6	P-0041253	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	537	20	0	Stable	Matched	63	8.64698095
+P-0041284-T01-IM6	P-0041284	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	660	30	0	Stable	Matched	73	12.10577333
+P-0041288-T01-IM6	P-0041288	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	492	40	0.12	Stable	Matched	69	6.052886665
+P-0041987-T01-IM6	P-0041987	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	569	60	0	Stable	Matched	72	6.91758476
+P-0041987-T02-IM6	P-0041987	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	600	40	0.3	Stable	Matched	73	7.782282855
+P-0042109-T01-IM6	P-0042109	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	656	60	28.04	Instable	Matched	67	36.31731999
+P-0042110-T01-IM6	P-0042110	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	341	70	0.37	Stable	Matched	63	9.511679045
+P-0042356-T01-IM6	P-0042356	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	781	40	0	Stable	Matched	89	4.323490475
+P-0042376-T01-IM6	P-0042376	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	688	70	0	Stable	Matched	62	5.18818857
+P-0042502-T01-IM6	P-0042502	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	764	40	0.11	Stable	Matched	75	18.15865999
+P-0042551-T01-IM6	P-0042551	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	435	60	0.74	Stable	Matched	68	3.45879238
+P-0042869-T01-IM6	P-0042869	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	471	40	0	Stable	Matched	72	6.91758476
+P-0044204-T01-IM6	P-0044204	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	434	50	0	Stable	Matched	74	14.69986761
+P-0044204-T02-IM6	P-0044204	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	534	80	0.11	Stable	Matched	74	11.24107523
+P-0044324-T01-IM6	P-0044324	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	763	80	1.15	Stable	Matched	90	6.91758476
+P-0044415-T01-IM6	P-0044415	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	467	20	14.98	Instable	Matched	68	51.0171876
+P-0044415-T02-IM6	P-0044415	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	372	30	12.22	Instable	Matched	68	57.07007427
+P-0044457-T01-IM6	P-0044457	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	481	20	0.68	Stable	Matched	63	0.864698095
+P-0044466-T02-IM6	P-0044466	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	255	20	0.34	Stable	Matched	75	1.72939619
+P-0044491-T01-IM6	P-0044491	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	602	50	0.35	Stable	Matched	85	12.10577333
+P-0044491-T03-IM6	P-0044491	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	Metastatic	IMPACT468	778		1.77	Stable	Matched	85	12.97047142
+P-0044518-T01-IM6	P-0044518	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	431	50	0.4	Stable	Matched	75	6.052886665
+P-0044554-T01-IM6	P-0044554	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	703	30	0.06	Stable	Matched	63	9.511679045
+P-0044554-T02-IM6	P-0044554	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	563	40	0	Stable	Matched	64	6.052886665
+P-0044554-T03-IM6	P-0044554	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	369	40	0	Stable	Matched	64	5.18818857
+P-0044554-T04-IM6	P-0044554	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	586	50	0.46	Stable	Matched	64	0.864698095
+P-0044579-T01-IM6	P-0044579	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	905	40	0.36	Stable	Matched	79	11.24107523
+P-0044580-T01-IM6	P-0044580	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	774	80	0.35	Stable	Matched	80	6.91758476
+P-0044581-T01-IM6	P-0044581	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	MIBC	IMPACT468	1178	40	0.16	Stable	Matched	71	18.15865999
+P-0044702-T01-IM6	P-0044702	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	517	60	0.69	Stable	Matched	83	13.83516952
+P-0044932-T01-IM6	P-0044932	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	417	60	1.36	Stable	Matched	88	31.12913142
+P-0045054-T01-IM6	P-0045054	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	493	50	0.41	Stable	Matched	64	6.91758476
+P-0045134-T01-IM6	P-0045134	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	647	50	0.36	Stable	Matched	88	7.782282855
+P-0045134-T02-IM6	P-0045134	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	78	40			Matched	88	3.45879238
+P-0045203-T01-IM6	P-0045203	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	261	70	2.2	Stable	Matched	75	4.323490475
+P-0045507-T01-IM6	P-0045507	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	617	30	0.32	Stable	Matched	56	15.56456571
+P-0045552-T01-IM6	P-0045552	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	601	60	0.68	Stable	Matched	67	2.594094285
+P-0045565-T01-IM6	P-0045565	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	657	40	0.77	Stable	Matched	74	9.511679045
+P-0045821-T01-IM6	P-0045821	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	657	60	0.23	Stable	Matched	60	6.052886665
+P-0046092-T01-IM6	P-0046092	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	253	70	1.41	Stable	Matched	71	10.37637714
+P-0046292-T01-IM6	P-0046292	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	554	60	0.12	Stable	Matched	59	17.2939619
+P-0046447-T01-IM6	P-0046447	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	419	20	0	Stable	Matched	41	10.37637714
+P-0046580-T02-IM6	P-0046580	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	770	30	0.11	Stable	Matched	82	10.37637714
+P-0046649-T01-IM6	P-0046649	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	535	20	0.11	Stable	Matched	72	6.052886665
+P-0046663-T01-IM6	P-0046663	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	623	30	0.06	Stable	Matched	67	4.323490475
+P-0046677-T01-IM6	P-0046677	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	486	10	0.4	Stable	Matched	83	22.48215047
+P-0047290-T01-IM6	P-0047290	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	410	60	0.85	Stable	Matched	80	12.97047142
+P-0047388-T01-IM6	P-0047388	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	834	20	0	Stable	Matched	76	4.323490475
+P-0047538-T01-IM6	P-0047538	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	636	60	0.98	Stable	Matched	43	9.511679045
+P-0047573-T01-IM6	P-0047573	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	485	50	0	Stable	Matched	61	7.782282855
+P-0047604-T02-IM6	P-0047604	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	518	70	0.37	Stable	Matched	48	4.323490475
+P-0047668-T01-IM6	P-0047668	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	360	60	31.06	Instable	Matched	49	30.26443332
+P-0047668-T03-IM6	P-0047668	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	598	30	32.11	Instable	Matched	49	41.50550856
+P-0047715-T01-IM6	P-0047715	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	514	60	0.18	Stable	Matched	71	41.50550856
+P-0047741-T01-IM6	P-0047741	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	593	40	0	Stable	Matched	72	13.83516952
+P-0047890-T01-IM6	P-0047890	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	726	60	0.2	Stable	Matched	66	2.594094285
+P-0047905-T01-IM6	P-0047905	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	682	30	0	Stable	Matched	49	1.72939619
+P-0047971-T01-IM6	P-0047971	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	536	30	0	Stable	Matched	58	9.511679045
+P-0048074-T01-IM6	P-0048074	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	513	50	0.87	Stable	Matched	68	6.91758476
+P-0048113-T01-IM6	P-0048113	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	552	50	0.06	Stable	Matched	66	10.37637714
+P-0048135-T01-IM6	P-0048135	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	613	10	0.27	Stable	Matched	67	8.64698095
+P-0048225-T01-IM6	P-0048225	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	437	70	0	Stable	Matched	77	7.782282855
+P-0048225-T03-IM6	P-0048225	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	502	50	0	Stable	Matched	77	7.782282855
+P-0048283-T01-IM6	P-0048283	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	737		0	Stable	Matched	50	2.594094285
+P-0048295-T01-IM6	P-0048295	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	362	60	1.31	Stable	Matched	84	3.45879238
+P-0048403-T01-IM6	P-0048403	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	481	50	0.31	Stable	Matched	73	6.91758476
+P-0048403-T07-IM7	P-0048403	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	512	80	0.95	Stable	Matched	76	7.383125129
+P-0048406-T01-IM6	P-0048406	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	543	10	0.07	Stable	Matched	52	1.72939619
+P-0048461-T01-IM6	P-0048461	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	422	40	0.13	Stable	Matched	73	10.37637714
+P-0048474-T01-IM6	P-0048474	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	564	30	0	Stable	Matched	69	4.323490475
+P-0048511-T01-IM6	P-0048511	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	521	30	-1	Do not report	Unmatched	68	11.24107523
+P-0048532-T01-IM6	P-0048532	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	698	80	1.74	Stable	Matched	75	12.97047142
+P-0048716-T01-IM6	P-0048716	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	713	30	0	Stable	Matched	66	6.91758476
+P-0048716-T02-IM6	P-0048716	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	386	30	0.15	Stable	Matched	66	6.91758476
+P-0048793-T01-IM6	P-0048793	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	584	30	0.11	Stable	Matched	67	63.12296093
+P-0049031-T01-IM6	P-0049031	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	582	60	0.15	Stable	Matched	72	11.24107523
+P-0049257-T01-IM6	P-0049257	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	300	20	0.3	Stable	Matched	77	6.91758476
+P-0049259-T01-IM6	P-0049259	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	574	70	0.27	Stable	Matched	77	6.91758476
+P-0049424-T01-IM6	P-0049424	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	502	20	0	Stable	Matched	80	5.18818857
+P-0049566-T01-IM6	P-0049566	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	479	10	0	Stable	Matched	65	2.594094285
+P-0049606-T01-IM6	P-0049606	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	482	50	0.72	Stable	Matched	79	9.511679045
+P-0049799-T01-IM6	P-0049799	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	749	90	0.21	Stable	Matched	65	7.782282855
+P-0049958-T01-IM6	P-0049958	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	779	80	0.53	Stable	Matched	72	3.45879238
+P-0050193-T01-IM6	P-0050193	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	259	30	0.13	Stable	Matched	66	4.323490475
+P-0050195-T01-IM6	P-0050195	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	402	70	0.89	Stable	Matched	77	16.4292638
+P-0050202-T01-IM6	P-0050202	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	528	50	0.06	Stable	Matched	63	9.511679045
+P-0050402-T01-IM6	P-0050402	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	656	30	0.14	Stable	Matched	70	9.511679045
+P-0050435-T01-IM6	P-0050435	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	584	20	1.18	Stable	Matched	76	14.69986761
+P-0050440-T01-IM6	P-0050440	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	672	10	0	Stable	Matched	76	2.594094285
+P-0050649-T01-IM6	P-0050649	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	625	10	0	Stable	Matched	82	2.594094285
+P-0050660-T01-IM6	P-0050660	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	614	50	0.41	Stable	Matched	70	5.18818857
+P-0050660-T02-IM6	P-0050660	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	603	20	0	Stable	Matched	70	0.864698095
+P-0050701-T01-IM6	P-0050701	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	288	50	2.78	Stable	Matched	65	15.56456571
+P-0050768-T01-IM6	P-0050768	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	557	20	0	Stable	Matched	49	2.594094285
+P-0050955-T02-IM6	P-0050955	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	673	60	0.39	Stable	Matched	86	19.02335809
+P-0050971-T01-IM6	P-0050971	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	586	40	0.17	Stable	Matched	63	4.323490475
+P-0051008-T01-IM6	P-0051008	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	475	30	0.05	Stable	Matched	77	11.24107523
+P-0051008-T02-IM7	P-0051008	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	323	70	5.85	Indeterminate	Matched	78	9.023819602
+P-0051148-T01-IM6	P-0051148	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	438	10	0.06	Stable	Matched	69	10.37637714
+P-0051234-T01-IM6	P-0051234	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	530	60	0	Stable	Matched	66	7.782282855
+P-0051237-T01-IM6	P-0051237	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	189	30	12.82	Do not report	Matched	65	4.323490475
+P-0051267-T01-IM6	P-0051267	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	788	50	0.1	Stable	Matched	64	14.69986761
+P-0051509-T01-IM6	P-0051509	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	211	60	4.07	Do not report	Matched	69	8.64698095
+P-0051602-T01-IM6	P-0051602	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	408	50	0.64	Stable	Matched	59	11.24107523
+P-0051682-T01-IM6	P-0051682	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	608	60	0.16	Stable	Matched	49	31.12913142
+P-0051695-T01-IM6	P-0051695	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	699	60	0.14	Stable	Matched	59	11.24107523
+P-0051724-T01-IM6	P-0051724	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	450	70	0.46	Stable	Matched	64	2.594094285
+P-0051792-T01-IM6	P-0051792	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	677	30	0.08	Stable	Matched	55	8.64698095
+P-0051868-T01-IM6	P-0051868	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	675	50	0	Stable	Matched	76	13.83516952
+P-0051890-T01-IM6	P-0051890	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	431	80	0	Stable	Matched	33	11.24107523
+P-0052099-T01-IM6	P-0052099	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	711	50	0.39	Stable	Matched	72	5.18818857
+P-0052316-T03-IM7	P-0052316	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	511	20	4.07	Stable	Matched	83	5.742430656
+P-0052324-T01-IM6	P-0052324	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	659	50	0.15	Stable	Matched	75	5.18818857
+P-0052334-T01-IM6	P-0052334	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	985	50	0.35	Stable	Matched	72	6.052886665
+P-0052352-T02-IM6	P-0052352	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	470	30	0.75	Stable	Matched	81	14.69986761
+P-0052378-T01-IM6	P-0052378	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	747	10	0	Stable	Matched	50	7.782282855
+P-0052496-T01-IM6	P-0052496	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	446	70	0.06	Stable	Matched	63	7.782282855
+P-0052541-T01-IM6	P-0052541	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	702	30	0	Do not report	Matched	85	26.80564094
+P-0052567-T01-IM6	P-0052567	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	670	60	0.09	Stable	Matched	78	15.56456571
+P-0052620-T01-IM6	P-0052620	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	704	100	0.31	Stable	Matched	64	3.45879238
+P-0052706-T01-IM6	P-0052706	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	585	30	1.45	Stable	Matched	67	5.18818857
+P-0052719-T01-IM6	P-0052719	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	737	50	0.05	Stable	Matched	79	18.15865999
+P-0052797-T01-IM6	P-0052797	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	764	70	1.56	Stable	Matched	52	4.323490475
+P-0052810-T02-IM6	P-0052810	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	623	60	0.22	Stable	Matched	71	6.052886665
+P-0053115-T01-IM6	P-0053115	Tumor	UCU	Bladder Cancer	Urethral Urothelial Carcinoma	MIBC	IMPACT468	635	60	7.33	Indeterminate	Matched	78	44.96430094
+P-0053218-T02-IM6	P-0053218	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT468	600	60	1.69	Stable	Matched	67	6.91758476
+P-0053218-T03-IM6	P-0053218	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	566	50	1.1	Stable	Matched	67	6.91758476
+P-0053310-T01-IM6	P-0053310	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	966	30	0.04	Stable	Matched	80	4.323490475
+P-0053408-T01-IM6	P-0053408	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	811	80	0	Stable	Matched	82	4.323490475
+P-0053514-T01-IM6	P-0053514	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	643	30	0.23	Stable	Matched	58	9.511679045
+P-0053694-T01-IM6	P-0053694	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	771	20	0.29	Stable	Matched	54	6.91758476
+P-0053825-T01-IM6	P-0053825	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	697	80	0.1	Stable	Matched	67	44.96430094
+P-0053890-T01-IM6	P-0053890	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	589	70	0.06	Stable	Matched	61	5.18818857
+P-0053894-T01-IM6	P-0053894	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	728	70	0.2	Stable	Matched	62	5.18818857
+P-0054249-T01-IM6	P-0054249	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	737	40	0.17	Stable	Matched	74	0.864698095
+P-0054348-T01-IM6	P-0054348	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	762	30	0.1	Stable	Matched	39	13.83516952
+P-0054353-T01-IM6	P-0054353	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	693	60	0.1	Stable	Matched	72	1.72939619
+P-0054353-T02-IM7	P-0054353	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	629	80	0.88	Stable	Matched	73	3.281388946
+P-0054398-T01-IM6	P-0054398	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	777	70	0.05	Stable	Matched	56	7.782282855
+P-0054403-T01-IM6	P-0054403	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	539	60	0.05	Stable	Matched	49	7.782282855
+P-0054498-T01-IM6	P-0054498	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	726	30	0	Stable	Matched	69	6.052886665
+P-0054685-T01-IM6	P-0054685	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	673	30	0.06	Stable	Matched	69	8.64698095
+P-0055376-T01-IM6	P-0055376	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT468	600	80	25.63	Instable	Matched	46	58.79947046
+P-0055409-T01-IM6	P-0055409	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	616	80	0.41	Stable	Matched	79	2.594094285
+P-0055460-T01-IM6	P-0055460	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT468	593	40	0.54	Stable	Matched	65	12.97047142
+P-0055529-T01-IM6	P-0055529	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Localized UTUC	IMPACT468	648	80	0.86	Stable	Matched	63	6.052886665
+P-0055936-T01-IM6	P-0055936	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	696	40	1.18	Stable	Matched	58	11.24107523
+P-0055936-T03-IM7	P-0055936	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	331	60	2.21	Stable	Matched	59	14.76625026
+P-0056248-T02-IM6	P-0056248	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	706	40	0.21	Stable	Matched	65	3.45879238
+P-0056248-T03-IM6	P-0056248	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT468	373	30	0.06	Stable	Matched	65	3.45879238
+P-0056846-T01-IM6	P-0056846	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT468	485	60	0	Stable	Matched	58	4.323490475
+P-0057043-T01-IM6	P-0057043	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT468	813	80	0.43	Stable	Matched	69	13.83516952
+P-0059195-T01-IM7	P-0059195	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	Metastatic	IMPACT505	418	30	0.28	Stable	Matched	51	0
+P-0060550-T01-IM7	P-0060550	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	606	80	1.1	Stable	Matched	73	6.562777893
+P-0060685-T02-IM7	P-0060685	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	648	50	0.7	Stable	Matched	77	9.844166839
+P-0060845-T01-IM7	P-0060845	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	803	60	0.44	Stable	Matched	81	5.742430656
+P-0060947-T01-IM7	P-0060947	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	584	60	0.12	Stable	Matched	77	11.48486131
+P-0061909-T03-IM7	P-0061909	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	455	30	0	Stable	Matched	61	7.383125129
+P-0062262-T01-IM7	P-0062262	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	496	30	0.27	Stable	Matched	67	9.023819602
+P-0062262-T02-IM7	P-0062262	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	409	70	3.41	Indeterminate	Matched	68	16.40694473
+P-0063393-T01-IM7	P-0063393	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	447	40	0.11	Stable	Matched	70	18.86798644
+P-0063432-T01-IM7	P-0063432	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	60	60			Matched	90	3.281388946
+P-0063598-T01-IM7	P-0063598	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	529	60	0.77	Stable	Matched	45	6.562777893
+P-0063619-T01-IM7	P-0063619	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	500	70	1.26	Stable	Matched	76	6.562777893
+P-0063672-T01-IM7	P-0063672	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	558	90	3.6	Indeterminate	Matched	66	10.66451408
+P-0063851-T01-IM7	P-0063851	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Metastatic	IMPACT505	804	20	0.06	Stable	Matched	80	4.922083419
+P-0063929-T01-IM7	P-0063929	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT505	338	50	2.37	Stable	Matched	81	82.03472366
+P-0063976-T01-IM7	P-0063976	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	472	60	0.62	Stable	Matched	65	7.383125129
+P-0064378-T01-IM7	P-0064378	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	249	50	0.63	Stable	Matched	77	4.101736183
+P-0064650-T01-IM7	P-0064650	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	639	40	0.87	Stable	Matched	76	4.101736183
+P-0064876-T01-IM7	P-0064876	Tumor	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma	Localized UTUC	IMPACT505	447	30	0.57	Stable	Matched	72	8.203472366
+P-0064938-T02-IM7	P-0064938	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	295	70	1.99	Stable	Matched	79	6.562777893
+P-0064956-T01-IM7	P-0064956	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	MIBC	IMPACT505	463	20	0	Stable	Matched	67	11.48486131
+P-0065056-T01-IM7	P-0065056	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	420	50	0.33	Stable	Matched	72	13.12555579
+P-0065167-T01-IM7	P-0065167	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	505	20	0.01	Stable	Matched	74	6.562777893
+P-0065278-T01-IM7	P-0065278	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	606	70	0.33	Stable	Matched	69	18.0476392
+P-0065397-T01-IM7	P-0065397	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma	NMIBC	IMPACT505	690	40	0.22	Stable	Matched	64	3.281388946
+P-0068073-T01-IM7	P-0068073	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	445	70	2.75	Stable	Matched	62	8.203472366
+P-0068151-T02-IM7	P-0068151	Tumor	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		IMPACT505	595	10	0.04	Stable	Matched	72	4.101736183
+P-0016649-T04-XS1	P-0016649	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	843		-1		Matched	67	13.98421462
+P-0016649-T05-XS1	P-0016649	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1500		-1		Matched	68	13.98421462
+P-0016649-T06-XS1	P-0016649	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	849		-1		Matched	68	16.78105754
+P-0016649-T07-XS1	P-0016649	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	863		-1		Matched	68	13.98421462
+P-0048403-T06-XS1	P-0048403	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1561		-1		Matched	75	5.593685847
+P-0051724-T04-XS1	P-0051724	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1840		-1		Matched	66	11.18737169
+P-0051724-T05-XS1	P-0051724	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1197		-1		Matched	67	8.390528771
+P-0054353-T03-XS1	P-0054353	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2049		-1		Matched	74	5.593685847
+P-0054353-T04-XS1	P-0054353	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	948		-1		Matched	74	5.593685847
+P-0055936-T04-XS1	P-0055936	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1752		-1		Matched	59	5.593685847
+P-0055936-T05-XS1	P-0055936	cfDNA	BLADDER	Bladder Cancer	Bladder Cancer		ACCESS129	1507		-1		Matched	60	16.78105754
+P-0055936-T06-XS1	P-0055936	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1744		-1		Matched	60	16.78105754
+P-0056248-T04-XS1	P-0056248	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1489		-1		Matched	66	16.78105754
+P-0060845-T02-XS1	P-0060845	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1529		-1		Matched	82	11.18737169
+P-0060845-T03-XS1	P-0060845	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2278		-1		Matched	82	11.18737169
+P-0062262-T03-XS1	P-0062262	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1270		-1		Matched	69	11.18737169
+P-0062262-T04-XS1	P-0062262	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1557		-1		Matched	69	13.98421462
+P-0068073-T02-XS1	P-0068073	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1431		-1		Matched	62	8.390528771
+P-0068151-T01-XS1	P-0068151	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1579		-1		Matched	71	0
+P-0068151-T03-XS1	P-0068151	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1813		-1		Matched	72	2.796842924
+P-0068151-T04-XS1	P-0068151	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1190		-1		Matched	72	2.796842924
+P-0068151-T05-XS1	P-0068151	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1329		-1		Matched	73	8.390528771
+P-0004257-T03-XS1	P-0004257	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1116		-1		Matched		19.57790047
+P-0004257-T04-XS1	P-0004257	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1526		-1		Matched		5.593685847
+P-0004257-T05-XS1	P-0004257	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1303		-1		Matched		2.796842924
+P-0004257-T06-XS1	P-0004257	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1161		-1		Matched		5.593685847
+P-0004257-T07-XS1	P-0004257	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1277		-1		Matched		11.18737169
+P-0004257-T08-XS1	P-0004257	cfDNA	UCU	Bladder Cancer	Urethral Urothelial Carcinoma		ACCESS129	1865		-1		Matched		27.96842924
+P-0004257-T09-XS1	P-0004257	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1063		-1		Matched		27.96842924
+P-0010096-T05-XS1	P-0010096	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1615		-1		Matched		8.390528771
+P-0010096-T06-XS1	P-0010096	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1377		-1		Matched		11.18737169
+P-0015766-T02-XS1	P-0015766	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	890		-1		Matched		11.18737169
+P-0015766-T03-XS1	P-0015766	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1071		-1		Matched		0
+P-0015766-T04-XS1	P-0015766	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	453		-1		Matched		11.18737169
+P-0015766-T05-XS1	P-0015766	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1303		-1		Matched		2.796842924
+P-0015766-T06-XS1	P-0015766	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2290		-1		Matched		13.98421462
+P-0016649-T03-XS1	P-0016649	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1950		-1		Matched		13.98421462
+P-0026839-T02-XS1	P-0026839	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1367		-1		Matched		13.98421462
+P-0026839-T03-XS1	P-0026839	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2147		-1		Matched		8.390528771
+P-0026970-T02-XS1	P-0026970	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1469		-1		Matched		27.96842924
+P-0026970-T03-XS1	P-0026970	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1692		-1		Matched		0
+P-0026970-T04-XS1	P-0026970	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1632		-1		Matched		0
+P-0033799-T03-XS1	P-0033799	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1428		-1		Matched		16.78105754
+P-0033799-T05-XS1	P-0033799	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1780		-1		Matched		8.390528771
+P-0033799-T09-XS1	P-0033799	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1554		-1		Matched		25.17158631
+P-0033799-T11-XS1	P-0033799	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1539		-1		Matched		30.76527216
+P-0033799-T12-XS1	P-0033799	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1659		-1		Matched		25.17158631
+P-0034651-T02-XS1	P-0034651	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1150		-1		Matched		13.98421462
+P-0035999-T04-XS1	P-0035999	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1505		-1		Matched		8.390528771
+P-0035999-T05-XS1	P-0035999	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1465		-1		Matched		11.18737169
+P-0037307-T02-XS1	P-0037307	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1621		-1		Matched		13.98421462
+P-0037307-T03-XS1	P-0037307	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1404		-1		Matched		13.98421462
+P-0037307-T04-XS1	P-0037307	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2186		-1		Matched		19.57790047
+P-0037307-T05-XS1	P-0037307	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1638		-1		Matched		22.37474339
+P-0040700-T02-XS1	P-0040700	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1610		-1		Matched		8.390528771
+P-0040700-T03-XS1	P-0040700	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1472		-1		Matched		8.390528771
+P-0040700-T04-XS1	P-0040700	cfDNA	UCU	Bladder Cancer	Urethral Urothelial Carcinoma		ACCESS129	2037		-1		Matched		11.18737169
+P-0042869-T02-XS1	P-0042869	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1787		-1		Matched		25.17158631
+P-0042869-T03-XS1	P-0042869	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1843		-1		Matched		22.37474339
+P-0042869-T04-XS1	P-0042869	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1456		-1		Matched		27.96842924
+P-0042869-T05-XS1	P-0042869	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1476		-1		Matched		30.76527216
+P-0042869-T06-XS1	P-0042869	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	2423		-1		Matched		27.96842924
+P-0044204-T03-XS1	P-0044204	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1648		-1		Matched		13.98421462
+P-0044204-T04-XS1	P-0044204	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2065		-1		Matched		11.18737169
+P-0044204-T05-XS1	P-0044204	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1823		-1		Matched		19.57790047
+P-0044204-T06-XS1	P-0044204	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	716		-1		Matched		11.18737169
+P-0044491-T02-XS1	P-0044491	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	881		-1		Matched		16.78105754
+P-0044491-T04-XS1	P-0044491	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1348		-1		Matched		25.17158631
+P-0044491-T05-XS1	P-0044491	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1404		-1		Matched		30.76527216
+P-0044491-T06-XS1	P-0044491	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1333		-1		Matched		0
+P-0044491-T07-XS1	P-0044491	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1326		-1		Matched		25.17158631
+P-0044518-T02-XS1	P-0044518	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1844		-1		Matched		16.78105754
+P-0044518-T03-XS1	P-0044518	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2195		-1		Matched		8.390528771
+P-0044554-T05-XS1	P-0044554	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1510		-1		Matched		16.78105754
+P-0044554-T06-XS1	P-0044554	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	2237		-1		Matched		19.57790047
+P-0046092-T02-XS1	P-0046092	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1639		-1		Matched		11.18737169
+P-0046092-T03-XS1	P-0046092	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1974		-1		Matched		2.796842924
+P-0048403-T02-XS1	P-0048403	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1683		-1		Matched		5.593685847
+P-0048403-T03-XS1	P-0048403	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1727		-1		Matched		0
+P-0048403-T04-XS1	P-0048403	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1566		-1		Matched		8.390528771
+P-0048403-T05-XS1	P-0048403	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1780		-1		Matched		11.18737169
+P-0048561-T01-XS1	P-0048561	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1315		-1		Matched		13.98421462
+P-0051724-T02-XS1	P-0051724	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	1536		-1		Matched		2.796842924
+P-0051724-T03-XS1	P-0051724	cfDNA	UTUC	Bladder Cancer	Upper Tract Urothelial Carcinoma		ACCESS129	928		-1		Matched		0
+P-0055936-T02-XS1	P-0055936	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1498		-1		Matched		16.78105754
+P-0056248-T01-XS1	P-0056248	cfDNA	BLCA	Bladder Cancer	Bladder Urothelial Carcinoma		ACCESS129	1358		-1		Matched		0
