@@ -13,7 +13,7 @@ cbio <- cBioPortal()
 
 # Obter dados clínicos
 bladder_clin <- clinicalData(api = cbio, studyId = "bladder_msk_2023")
-bladder_clin
+#bladder_clin
 dim(bladder_clin)  # Deve retornar 526 linhas e 29 colunas
 
 # Carrega os dados do cBioPortal
@@ -32,6 +32,31 @@ summary(bladder)
 # Acessando os dados de cna e convertendo para um dataframe
 dados_cna = assays(bladder)$cna
 dados_cna_df = as.data.frame(dados_cna)
+
+## Aceder aos ficheiros dos metadados (formato .txt) presentes dentro da pasta "bladder_msk_2023"
+setwd("bladder_msk_2023")
+meta_cna_hg19_seg <- read.delim("meta_cna_hg19_seg.txt", sep = ":", 
+                                header = FALSE, 
+                                row.names = 1, 
+                                col.names = c("", "data")
+                                )
+meta_cna_hg19_seg
+
+meta_cna <- read.delim("meta_cna.txt", sep = ":", 
+                       header = FALSE, 
+                       row.names = 1, 
+                       col.names = c("", "data")
+)
+meta_cna
+
+# Metadados do estudo
+meta_study <- read.delim("meta_study.txt", sep = ":", 
+                         header = FALSE, 
+                         row.names = 1, 
+                         col.names = c("", "data")
+                         )
+meta_study["citation", "data"] # Citação
+
 
 # Acessando os dados de cna_hg19 e convertendo para um dataframe
 dados_cna_hg19 = assays(bladder)$cna_hg19.seg
