@@ -24,22 +24,6 @@ Em primeiro lugar, procedemos à instalação dos packages necessários para rea
 
 ```{r}
 # Instalação e carregamento dos pacotes necessários
-if (!require("BiocManager", quietly = TRUE)) {
-    install.packages("BiocManager")
-}
-
-BiocManager::install(c("edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "RColorBrewer", "TCGAbiolinks", "DESeq2"))
-
-# Carrega os pacotes instalados
-library(edgeR)
-library(limma)
-library(Glimma)
-library(gplots)
-library(org.Mm.eg.db)
-library(RColorBrewer)
-library(TCGAbiolinks)
-library(DESeq2)
-
 # Verifica se o BiocManager está instalado e instala se necessário
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
@@ -47,6 +31,27 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 # Verifica se o pacote cBioPortalData está instalado e instala se necessário
 if (!requireNamespace("cBioPortalData", quietly = TRUE))
   BiocManager::install("cBioPortalData")
+
+BiocManager::install(c("edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "RColorBrewer", "TCGAbiolinks", "DESeq2"))
+
+# Instalação dos pacotes "GGally" e "tibble"
+install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
+#install.packages("tibble")
+
+# Carrega os pacotes instalados
+library(edgeR)
+library(limma)
+library(Glimma)
+library(gplots)
+library(tidyverse)
+library(ggplot2)
+library(GGally)
+library(tibble)
+library(dplyr)
+library(org.Mm.eg.db)
+library(RColorBrewer)
+library(TCGAbiolinks)
+library(DESeq2)
 
 # Carregamento do pacote cBioPortalData
 library(cBioPortalData)
@@ -91,8 +96,89 @@ dados_mutacao_df = as.data.frame(dados_mutacao)
 
 ```
 ```{r}
+# Extração dos Metadados
+# Aceder aos ficheiros dos metadados (formato .txt) presentes dentro da pasta "bladder_msk_2023"
+setwd("bladder_msk_2023")
+meta_cna_hg19_seg <- read.delim("meta_cna_hg19_seg.txt", sep = ":", 
+                                header = FALSE, 
+                                row.names = 1, 
+                                col.names = c("", "data")
+                                )
+meta_cna_hg19_seg
+
+meta_cna <- read.delim("meta_cna.txt", sep = ":", 
+                       header = FALSE, 
+                       row.names = 1, 
+                       col.names = c("", "data")
+)
+meta_cna
+
+# Metadados do estudo
+meta_study <- read.delim("meta_study.txt", sep = ":", 
+                         header = FALSE, 
+                         row.names = 1, 
+                         col.names = c("", "data")
+                         )
+meta_study["citation", "data"] # Citação
+meta_study["pmid", "data"]     # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
+
 
 ```
+```{r}
+# Verificar colunas com valores NA
+colSums(is.na(bladder_clin)) # Verifica quandos valores NA cada coluna tem
+print(colSums(is.na(bladder_clin))[colSums(is.na(bladder_clin)) > 0]) # Mostra quais as colunas têm valores NA
+
+# Get the column names of bladder_clin
+column_names <- names(bladder_clin)
+
+# Initialize an empty list to store numeric columns
+numeric_columns <- c()
+
+# Loop through each column and check if it contains numeric values
+for (col in column_names) {
+  if (is.numeric(bladder_clin[[col]])) {
+    numeric_columns <- c(numeric_columns, col)
+  }
+}
+
+# Print the list of numeric columns
+print(numeric_columns)
+
+```
+
+Determinar as variáveis para a Análise Estatística
+
+```{r}
+str(bladder_clin) # as colunas são todas do tipo chr (character)
+
+library(dplyr)
+
+# Convert specific columns to numeric
+bladder_clin <- bladder_clin %>%
+  mutate(
+    SEQUENCING_OS_MONTHS = as.numeric(SEQUENCING_OS_MONTHS),
+    AGE_AT_SEQ_REPORTED_YEARS = as.numeric(AGE_AT_SEQ_REPORTED_YEARS),
+    FRACTION_GENOME_ALTERED = as.numeric(FRACTION_GENOME_ALTERED),
+    MSI_SCORE = as.numeric(MSI_SCORE),
+    MUTATION_COUNT = as.numeric(MUTATION_COUNT),
+    SAMPLE_COVERAGE = as.numeric(SAMPLE_COVERAGE),
+    TMB_NONSYNONYMOUS = as.numeric(TMB_NONSYNONYMOUS),
+    TUMOR_PURITY = as.numeric(TUMOR_PURITY)
+  )
+
+# Subset the dataset to include only numeric columns
+numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
+
+# Create a pairplot with only numeric columns
+pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf)
+pairplot
+
+ggsave("pairplot.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory
+
+
+```
+
 Análise Estatística de Dados de Cancro da Bexiga
 
 Definição das Variáveis com as.factor
