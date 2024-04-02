@@ -176,6 +176,11 @@ pairplot
 
 ggsave("pairplot.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory
 
+# Analisando o pairplot, podemos deduzir que as colunas que precisam de ser logaritmizadas são: 
+# MSI_SCORE
+# MUTATION_COUNT
+# SAMPLE_COVERAGE
+# TMB_NONSYNONYMOUS
 
 ```
 
