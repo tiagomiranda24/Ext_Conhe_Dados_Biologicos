@@ -232,7 +232,7 @@ smoking_status = as.factor(bladder_clin$SMOKIMG_STATUS)
 somatic_status = as.factor(bladder_clin$SOMATIC_STATUS)
 
 ```
-## 1 - Variáveis Numéricas
+## 1 Variáveis Numéricas
 
 1.1. *Idade em que a Sequenciação foi Reportada (Anos)*
 1.2. *Sobrevivência Global (Meses desde o Tx com Erdafitinib)*
@@ -307,27 +307,7 @@ barplot(table(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
 boxplot(as.numeric(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS), horizontal = T)
 
 ```
-1.4 Sobrevivência Global em Meses desde o Sequenciamento
-```{r}
-# Remover valores missing
-bladder_clin_filtered <- na.omit(bladder_clin)
-
-# Resumo das medidas de tendencia central e dispersão
-summary(bladder_clin_filtered$SEQUENCING_OS_MONTHS)
-
-# Calcular o desvio padrão
-sd(bladder_clin_filtered$SEQUENCING_OS_MONTHS)
-
-# Calcular o Intervalo Interquartílico (IQR)
-IQR(bladder_clin_filtered$SEQUENCING_OS_MONTHS)
-
-# Barplot
-barplot(table(bladder_clin_filtered$SEQUENCING_OS_MONTHS))
-
-# Boxplot
-boxplot(as.numeric(bladder_clin_filtered$SEQUENCING_OS_MONTHS), horizontal = TRUE)
-```
-## 2 - Variáveis Categóricas:
+## 2. Variáveis Categóricas:
 
 2.1. *Detalhes do Tipo de Câncro*
 2.2. *Estado da Doença*
@@ -546,36 +526,6 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
     col = rainbow(length(freq_rel)),
     cex = 0.8)
 ```
-2.7. Classe da Amostra
-```{r}
-# Gráfico de barras para visualizar as frequências absolutas
-barplot(table(bladder_clin$SAMPLE_CLASS), 
-        main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
-
-# Calcular as frequências absolutas e relativas
-freq_abs <- table(bladder_clin$SAMPLE_CLASS)
-freq_rel <- prop.table(freq_abs)
-
-# Criar um data frame com as frequências absolutas e relativas
-freq_data <- data.frame(Categoria = names(freq_abs),
-                        Frequencia_Absoluta = as.numeric(freq_abs),
-                        Frequencia_Relativa = as.numeric(freq_rel))
-
-# Gráfico de barras para as frequências absolutas
-barplot(freq_abs, main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
-
-# Gráfico de barras para as frequências relativas
-barplot(freq_rel, main = "Distribuição Relativa por Categoria",
-        xlab = "Categoria", ylab = "Frequência Relativa")
-
-# Criar o gráfico de pizza
-pie(freq_rel, main = "Distribuição Relativa por Categoria",
-    labels = paste(names(freq_rel), ": ", round(freq_rel * 100, 2), "%"), 
-    col = rainbow(length(freq_rel)),
-    cex = 0.8)
-```
 2.8. Sexo
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
@@ -666,71 +616,26 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
     col = rainbow(length(freq_rel)),
     cex = 0.8)
 ```
-2.11. Tipo de MSI (Instabilidade de Microssatélites)
-```{r}
-# Gráfico de barras para visualizar as frequências absolutas
-barplot(table(bladder_clin$MSI_TYPE), 
-        main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
+## 3. Variáveis Contínuas:
 
-# Calcular as frequências absolutas e relativas
-freq_abs <- table(bladder_clin$MSI_TYPE)
-freq_rel <- prop.table(freq_abs)
+3.1. *Melhor Resposta ao Erdafitinib*
+3.2. *Fração do Genoma Alterado*
+3.3. *Contagem de Mutações*
+3.4. *TMB*
+3.5. *Pureza do Tumor*
 
-# Criar um data frame com as frequências absolutas e relativas
-freq_data <- data.frame(Categoria = names(freq_abs),
-                        Frequencia_Absoluta = as.numeric(freq_abs),
-                        Frequencia_Relativa = as.numeric(freq_rel))
 
-# Gráfico de barras para as frequências absolutas
-barplot(freq_abs, main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
+Na análise dessas variáveis numéricas, começamos por:
 
-# Gráfico de barras para as frequências relativas
-barplot(freq_rel, main = "Distribuição Relativa por Categoria",
-        xlab = "Categoria", ylab = "Frequência Relativa")
+1. **Resumo estatístico**: Utiliza a função `summary()` para calcular estatísticas descritivas, como mínimo, 1º quartil, mediana, média, 3º quartil e máximo da variável dependente. Os valores ausentes são removidos antes do cálculo (`na.omit()`).
 
-# Criar o gráfico de pizza
-pie(freq_rel, main = "Distribuição Relativa por Categoria",
-    labels = paste(names(freq_rel), ": ", round(freq_rel * 100, 2), "%"), 
-    col = rainbow(length(freq_rel)),
-    cex = 0.8)
-```
-2.12. Código Oncotree
-```{r}
-# Gráfico de barras para visualizar as frequências absolutas
-barplot(table(bladder_clin$ONCOTREE_CODE), 
-        main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
+2. **Desvio padrão**: Calcula o desvio padrão da variável dependente usando a função `sd()`. Novamente, os valores ausentes são removidos antes do cálculo.
 
-# Calcular as frequências absolutas e relativas
-freq_abs <- table(bladder_clin$ONCOTREE_CODE)
-freq_rel <- prop.table(freq_abs)
+3. **Intervalo interquartílico (IQR)**: Calcula o intervalo interquartílico da variável dependente usando a função `IQR()`. Os valores ausentes são removidos antes do cálculo.
 
-# Criar um data frame com as frequências absolutas e relativas
-freq_data <- data.frame(Categoria = names(freq_abs),
-                        Frequencia_Absoluta = as.numeric(freq_abs),
-                        Frequencia_Relativa = as.numeric(freq_rel))
+4. **Visualização de frequência**: Plota um histograma de frequência dos valores da variável dependente usando a função `plot(table(...))`.
 
-# Gráfico de barras para as frequências absolutas
-barplot(freq_abs, main = "Frequência Absoluta por Categoria",
-        xlab = "Categoria", ylab = "Frequência Absoluta")
-
-# Gráfico de barras para as frequências relativas
-barplot(freq_rel, main = "Distribuição Relativa por Categoria",
-        xlab = "Categoria", ylab = "Frequência Relativa")
-
-# Criar o gráfico de pizza
-pie(freq_rel, main = "Distribuição Relativa por Categoria",
-    labels = paste(names(freq_rel), ": ", round(freq_rel * 100, 2), "%"), 
-    col = rainbow(length(freq_rel)), cex = 0.8)
-```
-3. Variáveis Contínuas:
-3.1. Melhor Resposta ao Erdafitinib
-3.2. Fração do Genoma Alterado
-3.3. Contagem de Mutações
-3.4. TMB
-3.5. Pureza do Tumor
+5. **Gráfico de caixa (boxplot)**: Cria um gráfico de caixa para visualizar a distribuição dos valores da variável dependente. Os valores ausentes são removidos antes de criar o gráfico.
 
 
 3.1. Melhor Resposta ao Erdafitinib
@@ -814,48 +719,3 @@ barplot(table(bladder_clin$MUTATION_COUNT))
 # Criar o gráfico de caixa
 boxplot(bladder_msk_2023_clinical_data$"Mutation.Count", horizontal=T)
 ```
-3.4. TMB
-```{r}
-# Remover valores ausentes e calcular o valor minimo, 1º quartil, mediana, média, 3º quartil e valor máximo da variavel.
-summary_ <- summary(na.omit(bladder_clin$TMB_NONSYNONYMOUS))
-# Visualizar os valores
-summary_
-
-# Remover valores ausentes e calcular o desvio padrão da variavel.
-sd_ <- sd(na.omit(bladder_clin$TMB_NONSYNONYMOUS))
-# Visualizar o valor
-sd_
-
-# Remover valores ausentes e calcular o Intervalo interquartilico.
-IQR_ <- IQR(na.omit(bladder_clin$TMB_NONSYNONYMOUS))
-# Visualizar o valor
-IQR_
-
-barplot(table(bladder_clin$TMB_NONSYNONYMOUS))
-plot(table(bladder_clin$TMB_NONSYNONYMOUS))
-
-# Criar o gráfico de caixa
-boxplot(bladder_clin$TMB_NONSYNONYMOUS, horizontal=T)
-```
-3.5. Pureza do Tumor
-```{r}
-# Remover valores ausentes e calcular o valor minimo, 1º quartil, mediana, média, 3º quartil e valor máximo da variavel.
-summary_ <- summary(na.omit(bladder_clin$TUMOR_PURITY))
-# Visualizar os valores
-summary_
-
-# Remover valores ausentes e calcular o desvio padrão da variavel.
-sd_ <- sd(na.omit(bladder_clin$TUMOR_PURITY))
-# Visualizar o valor
-sd_
-
-# Remover valores ausentes e calcular o Intervalo interquartilico.
-IQR_ <- IQR(na.omit(bladder_clin$TUMOR_PURITY))
-# Visualizar o valor
-IQR_
-
-barplot(table(bladder_clin$TUMOR_PURITY))
-plot(table(bladder_clin$TUMOR_PURITY))
-
-# Criar o gráfico de caixa
-boxplot(bladder_clin$TUMOR_PURITY, horizontal=T)
