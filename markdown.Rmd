@@ -122,9 +122,12 @@ meta_study <- read.delim("meta_study.txt", sep = ":",
 meta_study["citation", "data"] # Citação
 meta_study["pmid", "data"]     # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
 
-
 ```
 ```{r}
+# Alterar/corrigir nome de colunas
+colnames(bladder_clin)[colnames(bladder_clin) == "SMOKIMG_STATUS"] <- "SMOKING_STATUS"
+colnames(bladder_clin)[colnames(bladder_clin) == "patientId"] <- "PATIENT_ID"
+
 # Verificar colunas com valores NA
 colSums(is.na(bladder_clin)) # Verifica quandos valores NA cada coluna tem
 print(colSums(is.na(bladder_clin))[colSums(is.na(bladder_clin)) > 0]) # Mostra quais as colunas têm valores NA
@@ -146,7 +149,6 @@ for (col in column_names) {
 print(numeric_columns)
 
 ```
-
 Determinar as variáveis para a Análise Estatística
 
 ```{r}
