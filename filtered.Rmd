@@ -95,6 +95,7 @@ dados_mutacao = assays(bladder)$mutations
 dados_mutacao_df = as.data.frame(dados_mutacao)
 
 ```
+
 ```{r}
 # Extração dos Metadados
 # Aceder aos ficheiros dos metadados (formato .txt) presentes dentro da pasta "bladder_msk_2023"
@@ -146,7 +147,6 @@ for (col in column_names) {
 print(numeric_columns)
 
 ```
-
 Determinar as variáveis para a Análise Estatística
 
 ```{r}
@@ -182,6 +182,27 @@ ggsave("pairplot.png", pairplot) # Guarda o pairplot como uma imagem .png no wor
 # SAMPLE_COVERAGE
 # TMB_NONSYNONYMOUS
 
+```
+
+Tratamento dos NAs
+```{r}
+# Tratamento dos NAs
+# Remove todas as amostras que têm valores NA (remove 96% dos dados)
+cleaned_data <- na.omit(bladder_clin)
+cleaned_data
+
+# Itera sobre cada coluna procura por valores NA, verifica se é coluna numérica e calcula a mediana, seguido de substituição dos NAs com a mediana dessa coluna. Se a coluna não for numérica, substitui os NAs por "Unknown"
+for (col in names(bladder_clin)) {
+  if (anyNA(bladder_clin[[col]])) {
+    if (is.numeric(bladder_clin[[col]])) {
+      median_val <- median(bladder_clin[[col]], na.rm = TRUE)
+      bladder_clin[[col]][is.na(bladder_clin[[col]])] <- median_val
+    } else {
+      # Substitui valores NA nas colunas "character type" por "Unknown"
+      bladder_clin[[col]][is.na(bladder_clin[[col]])] <- "Unknown"
+    }
+  }
+}
 ```
 
 Análise Estatística de Dados de Cancro da Bexiga
