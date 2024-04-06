@@ -32,25 +32,24 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 if (!requireNamespace("cBioPortalData", quietly = TRUE))
   BiocManager::install("cBioPortalData")
 
-BiocManager::install(c("edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "RColorBrewer", "TCGAbiolinks", "DESeq2"))
+BiocManager::install(c("edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "RColorBrewer", "TCGAbiolinks", "DESeq2"), ask = FALSE)
 
 # Instalação dos pacotes "GGally" e "tibble"
-install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
-#install.packages("tibble")
+if (!requireNamespace("GGally", quietly = TRUE))
+  install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
 
-# Carrega os pacotes instalados
+if (!requireNamespace("tibble", quietly = TRUE)) {
+  install.packages("tibble")
+}
+
+# Carrega os pacotes instalados/necessários
 library(edgeR)
 library(limma)
-library(Glimma)
-library(gplots)
 library(tidyverse)
 library(ggplot2)
 library(GGally)
 library(tibble)
 library(dplyr)
-library(org.Mm.eg.db)
-library(RColorBrewer)
-library(TCGAbiolinks)
 library(DESeq2)
 
 # Carregamento do pacote cBioPortalData
@@ -122,39 +121,23 @@ meta_study <- read.delim("meta_study.txt", sep = ":",
 meta_study["citation", "data"] # Citação
 meta_study["pmid", "data"]     # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
 
-
 ```
 ```{r}
+# Alterar/corrigir nome de colunas
+colnames(bladder_clin)[colnames(bladder_clin) == "SMOKIMG_STATUS"] <- "SMOKING_STATUS"
+colnames(bladder_clin)[colnames(bladder_clin) == "patientId"] <- "PATIENT_ID"
+
 # Verificar colunas com valores NA
 colSums(is.na(bladder_clin)) # Verifica quandos valores NA cada coluna tem
 print(colSums(is.na(bladder_clin))[colSums(is.na(bladder_clin)) > 0]) # Mostra quais as colunas têm valores NA
-
-# Get the column names of bladder_clin
-column_names <- names(bladder_clin)
-
-# Initialize an empty list to store numeric columns
-numeric_columns <- c()
-
-# Loop through each column and check if it contains numeric values
-for (col in column_names) {
-  if (is.numeric(bladder_clin[[col]])) {
-    numeric_columns <- c(numeric_columns, col)
-  }
-}
-
-# Print the list of numeric columns
-print(numeric_columns)
-
 ```
 
 Determinar as variáveis para a Análise Estatística
 
 ```{r}
-str(bladder_clin) # as colunas são todas do tipo chr (character)
+str(bladder_clin) # Verifica-se aqui que todas as colunas são do tipo chr (character)
 
-library(dplyr)
-
-# Convert specific columns to numeric
+# Conversão de colunas que possuem valores numéricas (no entanto não são) para serem numéricas
 bladder_clin <- bladder_clin %>%
   mutate(
     SEQUENCING_OS_MONTHS = as.numeric(SEQUENCING_OS_MONTHS),
@@ -167,10 +150,10 @@ bladder_clin <- bladder_clin %>%
     TUMOR_PURITY = as.numeric(TUMOR_PURITY)
   )
 
-# Subset the dataset to include only numeric columns
+# Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
 numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
 
-# Create a pairplot with only numeric columns
+# Criação de um pairplot com só as colunas numéricas para verificar as correlações
 pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf)
 pairplot
 
@@ -181,6 +164,53 @@ ggsave("pairplot.png", pairplot) # Guarda o pairplot como uma imagem .png no wor
 # MUTATION_COUNT
 # SAMPLE_COVERAGE
 # TMB_NONSYNONYMOUS
+
+```
+
+Tratamento dos NAs
+```{r}
+# Tratamento dos NAs
+cleaned_data <- na.omit(bladder_clin) # Criação de um novo dataset que exclui todas as amostras com valores NA (96% dos dados)
+cleaned_data
+
+# Itera sobre cada coluna procura por valores NA, verifica se é coluna numérica e calcula a mediana, seguido de substituição dos NAs com a mediana dessa coluna. Se a coluna não for numérica, substitui os NAs por "Unknown"
+for (col in names(bladder_clin)) {
+  if (anyNA(bladder_clin[[col]])) {
+    if (is.numeric(bladder_clin[[col]])) {
+      median_val <- median(bladder_clin[[col]], na.rm = TRUE)
+      bladder_clin[[col]][is.na(bladder_clin[[col]])] <- median_val
+    } else {
+      # Substitui valores NA nas colunas "character type" por "Unknown"
+      bladder_clin[[col]][is.na(bladder_clin[[col]])] <- "Unknown"
+    }
+  }
+}
+
+bladder_clin
+```
+
+Normalização dos dados
+```{r}
+# Normalização dos dados
+# Definida uma função "function(x) para Min-Max Scaling
+min_max_scaling <- function(x) {
+  if(is.numeric(x)) {
+    return ((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+  } else {
+    return (x)
+  }
+}
+
+# Min-Max Scaling é aplicada exclusivamente a colunas numéricas
+normalized_numeric <- lapply(bladder_clin, min_max_scaling)
+normalized_bladder_clin <- bladder_clin # Dataset com os dados normalizados
+
+# Substituição dos valores das colunas numéricas com os seus valores normalizados
+for (col in names(bladder_clin)) {
+  if (is.numeric(bladder_clin[[col]])) {
+    normalized_bladder_clin[[col]] <- normalized_numeric[[col]]
+  }
+}
 
 ```
 
@@ -226,7 +256,7 @@ sample_class = as.factor(bladder_clin$SAMPLE_CLASS)
 sexo = as.factor(bladder_clin$SEX)
 
 # Estado de Fumador
-smoking_status = as.factor(bladder_clin$SMOKIMG_STATUS)
+smoking_status = as.factor(bladder_clin$SMOKING_STATUS)
 
 # Estado Somático
 somatic_status = as.factor(bladder_clin$SOMATIC_STATUS)
@@ -281,7 +311,7 @@ summary(na.omit(bladder_clin$ERDAFITINIB_TX_OS_MONTHS))
 sd(na.omit(bladder_clin$ERDAFITINIB_TX_OS_MONTHS))
 
 # Intervalo Interquartílico
-IQR(na.omit(bladder_clin$ERDAFITINIB_TX_OS_MONTHS))
+IQR(na.omit(bladder_clin$ERDAFITINIB_TX_OS_MONTHS), na.rm = TRUE)
 
 # Barplot e boxplot
 barplot(table(bladder_clin$ERDAFITINIB_TX_OS_MONTHS))
@@ -300,7 +330,7 @@ summary(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
 sd(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
 
 # Intervalo Interquartílico
-IQR(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
+IQR(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS), na.rm = TRUE)
 
 # Barplot e boxplot
 barplot(table(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
@@ -354,7 +384,7 @@ Na análise dessas variáveis numéricas, começamos por:
 # Gráfico de barras para visualizar as frequências absolutas
 barplot(table(bladder_clin$CANCER_TYPE_DETAILED), 
         main = "Frequência Absoluta por Tipo de Cancro",
-        xlab = "Tipo de Câncer", ylab = "Frequência Absoluta")
+        xlab = "Tipo de Cancro", ylab = "Frequência Absoluta")
 
 # Calcular as frequências absolutas e relativas
 freq_abs <- table(bladder_clin$CANCER_TYPE_DETAILED)
@@ -366,12 +396,12 @@ freq_data <- data.frame(Categoria = names(freq_abs),
                         Frequencia_Relativa = as.numeric(freq_rel))
 
 # Gráfico de barras para as frequências absolutas
-barplot(freq_abs, main = "Frequência Absoluta por Tipo de Câncer",
-        xlab = "Tipo de Câncer", ylab = "Frequência Absoluta")
+barplot(freq_abs, main = "Frequência Absoluta por Tipo de Cancro",
+        xlab = "Tipo de Cancro", ylab = "Frequência Absoluta")
 
 # Gráfico de barras para as frequências relativas
-barplot(freq_rel, main = "Distribuição Relativa por Tipo de Câncer",
-        xlab = "Tipo de Câncer", ylab = "Frequência Relativa")
+barplot(freq_rel, main = "Distribuição Relativa por Tipo de Cancro",
+        xlab = "Tipo de Cancro", ylab = "Frequência Relativa")
 
 # Criar o gráfico de pizza
 pie(freq_rel, main = "Distribuição Relativa por Tipo de Cancro",
@@ -408,7 +438,7 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
     col = rainbow(length(freq_rel)),
     cex = 0.8)
 ```
-2.3. Tratamento com Erdafitinibe
+2.3. Tratamento com Erdafitinib
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
 barplot(table(bladder_clin$ERDAFITINIB_TREATED), 
@@ -438,7 +468,7 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
     col = rainbow(length(freq_rel)),
     cex = 0.8)
 ```
-2.4. Status de Sobrevivência Global desde o Tratamento com Erdafitinibe
+2.4. Status de Sobrevivência Global desde o Tratamento com Erdafitinib
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
 barplot(table(bladder_clin$ERDAFITINIB_TX_OS_STATUS), 
@@ -559,7 +589,7 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
 2.9. Status de Fumador
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
-barplot(table(bladder_clin$SMOKIMG_STATUS), 
+barplot(table(bladder_clin$SMOKING_STATUS), 
         main = "Frequência Absoluta por Categoria",
         xlab = "Categoria", ylab = "Frequência Absoluta")
 
