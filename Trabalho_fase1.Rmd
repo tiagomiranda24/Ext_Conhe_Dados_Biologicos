@@ -58,10 +58,13 @@ library(cBioPortalData)
 # Inicialização da API do cBioPortal
 cbio <- cBioPortal()
 ```
+
 # Exploração dos dados presentes no data set
+
 ## Including Plots
 
-Nesta fase é realizado o carregamento dos dados clinicos do estudo,  explorados os ensaios do estudo disponiveis e organizados em dataframes:
+Nesta fase é realizado o carregamento dos dados clinicos do estudo,
+explorados os ensaios do estudo disponiveis e organizados em dataframes:
 
 ```{r pressure, echo=FALSE}
 # Obter dados clínicos
@@ -94,6 +97,13 @@ dados_mutacao = assays(bladder)$mutations
 dados_mutacao_df = as.data.frame(dados_mutacao)
 ```
 
+Extração dos Metadados
+
+A extração dos metadados é um processo vital na organização e
+compreensão de conjuntos de dados. Os metadados fornecem informações
+essenciais sobre os dados, incluindo sua origem, estrutura, formato e
+significado.
+
 ```{r}
 # Extração dos Metadados
 # Aceder aos ficheiros dos metadados (formato .txt) presentes na pasta "bladder_msk_2023"
@@ -123,6 +133,27 @@ meta_study["pmid", "data"]     # pmid (PubMed ID), permite encontrar o artigo da
 
 ```
 
+Alteramos alguns nomes das colunas e verificamos se as colunas
+apresentavam valores de NAs
+
+Durante o processo de análise de dados, é comum realizar ajustes na
+estrutura do conjunto de dados para melhorar sua organização e
+compreensão. Uma etapa comum é a alteração dos nomes das colunas para
+torná-los mais descritivos e intuitivos. Isso facilita a interpretação
+dos dados e ajuda na identificação das variáveis.
+
+Além disso, é essencial verificar se as colunas apresentam valores
+ausentes (NAs) após as alterações. Os NAs podem ocorrer por diversos
+motivos, como erros de medição ou falhas na coleta de dados, e é
+fundamental identificá-los para decidir como tratá-los adequadamente
+durante a análise.
+
+Portanto, após a alteração dos nomes das colunas, é recomendável
+realizar uma verificação minuciosa para garantir a integridade dos dados
+e prepará-los para análises posteriores. Isso contribui para a
+confiabilidade e qualidade dos resultados obtidos a partir do conjunto
+de dados.
+
 ```{r}
 # Alterar/corrigir nome de colunas
 colnames(bladder_clin)[colnames(bladder_clin) == "SMOKIMG_STATUS"] <- "SMOKING_STATUS"
@@ -132,7 +163,9 @@ colnames(bladder_clin)[colnames(bladder_clin) == "patientId"] <- "PATIENT_ID"
 colSums(is.na(bladder_clin)) # Verifica quantos valores NA cada coluna tem
 print(colSums(is.na(bladder_clin))[colSums(is.na(bladder_clin)) > 0]) # Mostra quais as colunas têm valores NA
 ```
+
 ## Determinação das variáveis para a Análise Estatística
+
 ```{r}
 str(bladder_clin) # Verifica-se aqui que todas as colunas são do tipo chr (character)
 
@@ -168,6 +201,18 @@ ggsave("pairplot.png", pairplot) # Guarda o pairplot como uma imagem .png no wor
 ```
 
 ## Tratamento dos NAs
+
+O tratamento dos NAs, ou valores ausentes, é uma etapa crucial no
+processo de análise de dados. Os NAs podem surgir por uma variedade de
+razões, como erros de medição, falhas na coleta de dados ou simplesmente
+pela natureza dos dados.
+
+Os NAs das colunas numéricas são substituídos pela mediana.
+
+Relativamente às variáveis não numéricas substituímos por um valor
+"Unknown" (Desconhecido) para em vez de dar erro nos gráficos, criar uma
+variável à parte para valores que não podem ser integrados.
+
 ```{r}
 # Tratamento dos NAs
 cleaned_data <- na.omit(bladder_clin) # Criação de um novo dataset que exclui todas as amostras com valores NA (96% dos dados)
@@ -190,6 +235,13 @@ bladder_clin
 ```
 
 Normalização dos dados
+
+A normalização dos dados é um procedimento essencial em análises
+estatísticas e machine learning. O ajuste dos valores das variáveis
+ajuda a garantir que todas as variáveis contribuam igualmente para o
+modelo. Essa etapa preparatória é fundamental para obter resultados mais
+confiáveis e interpretações mais precisas
+
 ```{r}
 # Normalização dos dados
 # Definida uma função "function(x) para Min-Max Scaling
@@ -210,6 +262,17 @@ for (col in names(bladder_clin)) {
 ```
 
 ## Definição das variáveis com as.factor
+
+A função as.factor foi utilizada para converter variáveis categóricas
+num formato adequado para análise estatística sendo essencial para
+garantir que essas variáveis sejam tratadas corretamente pelos
+algoritmos e modelos. A função as.factor atribui um código numérico
+único para cada categoria da variável, facilitando a interpretação e
+manipulação dos dados. Ao definir as variáveis com as.factor, garantimos
+uma representação precisa das relações entre as categorias, permitindo
+uma análise estatística mais robusta e interpretações mais claras dos
+resultados.
+
 ```{r}
 # Idade em que a Sequenciação foi Reportada (Anos)
 age = as.factor(bladder_clin$AGE_AT_SEQ_REPORTED_YEARS)
@@ -253,28 +316,35 @@ smoking_status = as.factor(bladder_clin$SMOKING_STATUS)
 # Estado Somático
 somatic_status = as.factor(bladder_clin$SOMATIC_STATUS)
 ```
-####Análise estatística univariada e Caracterização dos tipos de variaveis
-### 1 Variáveis Numéricas
 
-1.1. Idade em que a Sequenciação foi Reportada (Anos)
-1.2. Sobrevivência Global (Meses desde o Tx com Erdafitinib)
-1.3. Sobrevivência Sem Progressão (Meses desde o Tx com Erdafitinib)
-1.4. Sobrevivência Global em Meses desde o Sequenciamento
+#### Análise estatística univariada e Caracterização dos tipos de
+variaveis \### 1 Variáveis Numéricas
+
+1.1. Idade em que a Sequenciação foi Reportada (Anos) 1.2. Sobrevivência
+Global (Meses desde o Tx com Erdafitinib) 1.3. Sobrevivência Sem
+Progressão (Meses desde o Tx com Erdafitinib) 1.4. Sobrevivência Global
+em Meses desde o Sequenciamento
 
 Na análise dessas variáveis numéricas, começamos por:
 
-1. Remover valores ausentes e calcular estatísticas descritivas:
-    - Primeiro, os valores ausentes (NaNs) da coluna com variáveis numéricas são removidos do conjunto de dados.
-    - Em seguida, são calculadas algumas estatísticas descritivas:
-        - Média dos valores da variável: Calcula-se a média dos valores da variável presentes no conjunto de dados limpo.
-        - Mediana dos valores da variável: Determina-se a mediana dos valores da variável.
-        - Desvio padrão dos valores da variável: Calcula-se o desvio padrão dos valores da variável.
-        - Intervalo interquartílico (IQR): O IQR é a diferença entre o terceiro quartil (Q3) e o primeiro quartil (Q1) dos valores da variável.
-
-2. Barplot e boxplot:
-    - Um gráfico de barras (barplot) é criado para visualizar a distribuição dos valores da variável.
-    - Um gráfico de caixa (boxplot) é gerado para mostrar a variação e os possíveis valores atípicos dos valores da variável.
-
+1.  Remover valores ausentes e calcular estatísticas descritivas:
+    -   Primeiro, os valores ausentes (NaNs) da coluna com variáveis
+        numéricas são removidos do conjunto de dados.
+    -   Em seguida, são calculadas algumas estatísticas descritivas:
+        -   Média dos valores da variável: Calcula-se a média dos
+            valores da variável presentes no conjunto de dados limpo.
+        -   Mediana dos valores da variável: Determina-se a mediana dos
+            valores da variável.
+        -   Desvio padrão dos valores da variável: Calcula-se o desvio
+            padrão dos valores da variável.
+        -   Intervalo interquartílico (IQR): O IQR é a diferença entre o
+            terceiro quartil (Q3) e o primeiro quartil (Q1) dos valores
+            da variável.
+2.  Barplot e boxplot:
+    -   Um gráfico de barras (barplot) é criado para visualizar a
+        distribuição dos valores da variável.
+    -   Um gráfico de caixa (boxplot) é gerado para mostrar a variação e
+        os possíveis valores atípicos dos valores da variável.
 
 ### 1.1. Idade em que a Sequenciação foi Reportada (Anos)
 ```{r}
@@ -295,6 +365,13 @@ boxplot(as.numeric(bladder_clin$AGE_AT_SEQ_REPORTED_YEARS),
 ```
 
 ### 1.2. Sobrevivência Global (Meses desde o Tx com Erdafitinib)
+
+A análise da sobrevivência global dos pacientes desde o início do
+tratamento com Erdafitinib revelou informações importantes. Após a
+remoção dos NAs, calculamos as estatísticas descritivas, incluindo o
+desvio padrão e o intervalo interquartílico. Além disso, representamos
+graficamente os dados usando um barplot e um boxplot.
+
 ```{r}
 # Remover valores ausentes e calcular estatísticas descritivas
 summary(na.omit(bladder_clin$ERDAFITINIB_TX_OS_MONTHS))
@@ -313,6 +390,17 @@ boxplot(as.numeric(bladder_clin$ERDAFITINIB_TX_OS_MONTHS),
 ```
 
 ### 1.3. Sobrevivência Sem Progressão (Meses desde o Tx com Erdafitinib)
+
+A análise da sobrevivência sem progressão dos pacientes desde o início
+do tratamento com Erdafitinib revela informações importantes sobre a
+eficácia do medicamento. Após a remoção dos NAs calculamos estatísticas
+descritivas, como desvio padrão e intervalo interquartílico. Além disso,
+representamos graficamente os dados usando um barplot e um boxplot,
+permitindo-nos visualizar a distribuição dos períodos de sobrevivência
+sem progressão dos pacientes. Essa análise ajuda-nos a compreender
+melhor a eficácia do tratamento com Erdafitinib em retardar a progressão
+da doença.
+
 ```{r}
 # Remover valores ausentes e calcular estatísticas descritivas
 summary(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
@@ -327,47 +415,47 @@ IQR(na.omit(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS), na.rm = TRUE)
 barplot(table(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS))
 boxplot(as.numeric(bladder_clin$ERDAFITINIB_TX_PFS_MONTHS), horizontal = T)
 ```
+
 ### 2. Variáveis Categóricas:
 
-2.1. Detalhes do Tipo de Câncro
-2.2. Estado da Doença
-2.3. Tratamento com Erdafitinibe
-2.4. Status de Sobrevivência Global desde o Tratamento com Erdafitinibe
-2.5. Status de Progressão Livre desde o Tratamento com Erdafitinibe
-2.6. Raça
-2.7. Classe da Amostra
-2.8. Sexo
-2.9. Status de Fumador
-2.10. Status Somático
-2.11. Tipo de MSI (Instabilidade de Microssatélites)
-2.12. Código Oncotree
+2.1. Detalhes do Tipo de Câncro 2.2. Estado da Doença 2.3. Tratamento
+com Erdafitinibe 2.4. Status de Sobrevivência Global desde o Tratamento
+com Erdafitinibe 2.5. Status de Progressão Livre desde o Tratamento com
+Erdafitinibe 2.6. Raça 2.7. Classe da Amostra 2.8. Sexo 2.9. Status de
+Fumador 2.10. Status Somático 2.11. Tipo de MSI (Instabilidade de
+Microssatélites) 2.12. Código Oncotree
 
 Na análise dessas variáveis numéricas, começamos por:
 
-1. Gráfico de barras para visualizar as frequências absolutas:
-    - Um gráfico de barras é criado para representar a frequência absoluta de cada categoria presente nos dados.
-   
-2. Cálculo das frequências absolutas e relativas:
-    - Primeiro, as frequências absolutas das diferentes categorias são calculadas.
-    - Em seguida, as frequências relativas são obtidas dividindo as frequências absolutas pelo total de observações.
-
-3. Criação de um data frame com as frequências absolutas e relativas:
-    - Um data frame chamado freq_data é criado, contendo três colunas:
-        - Categoria: Os nomes das diferentes categorias.
-        - Frequencia_Absoluta: As frequências absolutas correspondentes.
-        - Frequencia_Relativa: As frequências relativas correspondentes.
-
-4. Gráfico de barras para as frequências absolutas:
-    - Um novo gráfico de barras é gerado para representar as frequências absolutas das categorias.
-
-5. Gráfico de barras para as frequências relativas:
-    - Outro gráfico de barras é criado para mostrar a distribuição relativa das categorias.
-    - O título do gráfico é "Distribuição Relativa por Categoria".
-    - O eixo x é rotulado como "Categoria" e o eixo y é rotulado como "Frequência Relativa".
-
-6. Gráfico de pizza:
-    - Por fim, um gráfico de pizza é gerado para ilustrar a distribuição relativa das categorias.
-    - Os rótulos das fatias da pizza incluem o nome da categoria e a porcentagem correspondente arredondada.
+1.  Gráfico de barras para visualizar as frequências absolutas:
+    -   Um gráfico de barras é criado para representar a frequência
+        absoluta de cada categoria presente nos dados.
+2.  Cálculo das frequências absolutas e relativas:
+    -   Primeiro, as frequências absolutas das diferentes categorias são
+        calculadas.
+    -   Em seguida, as frequências relativas são obtidas dividindo as
+        frequências absolutas pelo total de observações.
+3.  Criação de um data frame com as frequências absolutas e relativas:
+    -   Um data frame chamado freq_data é criado, contendo três colunas:
+        -   Categoria: Os nomes das diferentes categorias.
+        -   Frequencia_Absoluta: As frequências absolutas
+            correspondentes.
+        -   Frequencia_Relativa: As frequências relativas
+            correspondentes.
+4.  Gráfico de barras para as frequências absolutas:
+    -   Um novo gráfico de barras é gerado para representar as
+        frequências absolutas das categorias.
+5.  Gráfico de barras para as frequências relativas:
+    -   Outro gráfico de barras é criado para mostrar a distribuição
+        relativa das categorias.
+    -   O título do gráfico é "Distribuição Relativa por Categoria".
+    -   O eixo x é rotulado como "Categoria" e o eixo y é rotulado como
+        "Frequência Relativa".
+6.  Gráfico de pizza:
+    -   Por fim, um gráfico de pizza é gerado para ilustrar a
+        distribuição relativa das categorias.
+    -   Os rótulos das fatias da pizza incluem o nome da categoria e a
+        porcentagem correspondente arredondada.
 
 #### 2.1. Detalhes do Tipo de Câncro
 ```{r}
@@ -400,6 +488,7 @@ pie(freq_rel, main = "Distribuição Relativa por Tipo de Cancro",
 ```
 
 ### 2.2. Estado da Doença
+
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
 barplot(table(bladder_clin$DISEASE_STATE), 
@@ -431,6 +520,7 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
 ```
 
 ### 2.3. Tratamento com Erdafitinibe
+
 ```{r}
 # Gráfico de barras para visualizar as frequências absolutas
 barplot(table(bladder_clin$ERDAFITINIB_TREATED), 
@@ -646,24 +736,31 @@ pie(freq_rel, main = "Distribuição Relativa por Categoria",
 ```
 ### 3. Variáveis Contínuas:
 
-3.1. *Melhor Resposta ao Erdafitinib*
-3.2. *Fração do Genoma Alterado*
-3.3. *Contagem de Mutações*
-3.4. *TMB*
-3.5. *Pureza do Tumor*
-
+3.1. *Melhor Resposta ao Erdafitinib* 3.2. *Fração do Genoma Alterado*
+3.3. *Contagem de Mutações* 3.4. *TMB* 3.5. *Pureza do Tumor*
 
 Na análise dessas variáveis numéricas, começamos por:
 
-1. **Resumo estatístico**: Utiliza a função `summary()` para calcular estatísticas descritivas, como mínimo, 1º quartil, mediana, média, 3º quartil e máximo da variável dependente. Os valores ausentes são removidos antes do cálculo (`na.omit()`).
+1.  **Resumo estatístico**: Utiliza a função `summary()` para calcular
+    estatísticas descritivas, como mínimo, 1º quartil, mediana, média,
+    3º quartil e máximo da variável dependente. Os valores ausentes são
+    removidos antes do cálculo (`na.omit()`).
 
-2. **Desvio padrão**: Calcula o desvio padrão da variável dependente usando a função `sd()`. Novamente, os valores ausentes são removidos antes do cálculo.
+2.  **Desvio padrão**: Calcula o desvio padrão da variável dependente
+    usando a função `sd()`. Novamente, os valores ausentes são removidos
+    antes do cálculo.
 
-3. **Intervalo interquartílico (IQR)**: Calcula o intervalo interquartílico da variável dependente usando a função `IQR()`. Os valores ausentes são removidos antes do cálculo.
+3.  **Intervalo interquartílico (IQR)**: Calcula o intervalo
+    interquartílico da variável dependente usando a função `IQR()`. Os
+    valores ausentes são removidos antes do cálculo.
 
-4. **Visualização de frequência**: Plota um histograma de frequência dos valores da variável dependente usando a função `plot(table(...))`.
+4.  **Visualização de frequência**: Plota um histograma de frequência
+    dos valores da variável dependente usando a função
+    `plot(table(...))`.
 
-5. **Gráfico de caixa (boxplot)**: Cria um gráfico de caixa para visualizar a distribuição dos valores da variável dependente. Os valores ausentes são removidos antes de criar o gráfico.
+5.  **Gráfico de caixa (boxplot)**: Cria um gráfico de caixa para
+    visualizar a distribuição dos valores da variável dependente. Os
+    valores ausentes são removidos antes de criar o gráfico.
 
 
 ### 3.1. Melhor Resposta ao Erdafitinib
@@ -725,11 +822,14 @@ boxplot(bladder_clin$MUTATION_COUNT, horizontal = TRUE)
 
 # Relação Tempo de sobrevivência global e o sexo
 
-##Análise de expressão diferencial e de enriquecimento
+## Análise de expressão diferencial e de enriquecimento
 
-Nesta fase, iremos realizar uma análise estatística univariada, bem como análises de expressão diferencial e de enriquecimento. 
+Nesta fase, iremos realizar uma análise estatística univariada, bem como
+análises de expressão diferencial e de enriquecimento.
 
-As variáveis a serem consideradas incluem o Tempo de sobrevivência global (Meses desde o inicio de tratamento com Erdafitinib)(bladder_clin$ERDAFITINIB_TX_OS_MONTHS) e o sexo (bladder_clin$SEX).
+As variáveis a serem consideradas incluem o Tempo de sobrevivência
+global (Meses desde o inicio de tratamento com
+Erdafitinib)(bladder_clin$ERDAFITINIB_TX_OS_MONTHS) e o sexo (bladder_clin$SEX).
 
 ```{r}
 # Verificar a classe da variável SEX
@@ -773,15 +873,19 @@ legend("topright", legend = unique(bladder_clin$SEX), fill = c("blue", "pink", "
 
 ```
 
-### ANOVA
-Para avaliar se o Tempo de Sobrevivência Global desde o início do tratamento para cada Sexo, foi considerada a avaliação da variável transformada.
-Desenhamos o gráfico boxplot que permita efetuar a comparação da distribuição do logaritmo do tempo de Sobrevivência Global desde o início do tratamento.
+### ANOVA Para avaliar se o Tempo de Sobrevivência Global desde o início
+do tratamento para cada Sexo, foi considerada a avaliação da variável
+transformada. Desenhamos o gráfico boxplot que permita efetuar a
+comparação da distribuição do logaritmo do tempo de Sobrevivência Global
+desde o início do tratamento.
 
-Testar a hipótese nula 𝐻0: 𝜇masculino = 𝜇feminino, onde μ indica o valor médio para cada sexo.
-É sugerida a utilização de uma ANOVA para a variável transformada (log(x)). 
+Testar a hipótese nula 𝐻0: 𝜇masculino = 𝜇feminino, onde μ indica o valor
+médio para cada sexo. É sugerida a utilização de uma ANOVA para a
+variável transformada (log(x)).
 
-Verificar os pressupostos para poder efetuar a dita análise. 
-Consideramos α=1% (Utilizamos também o teste de Shapiro (normalidade) e o teste de Fligner(homogeneidade)).
+Verificar os pressupostos para poder efetuar a dita análise.
+Consideramos α=1% (Utilizamos também o teste de Shapiro (normalidade) e
+o teste de Fligner(homogeneidade)).
 
 ```{r}
 boxplot(log(bladder_clin$ERDAFITINIB_TX_OS_MONTHS) ~ bladder_clin$SEX, 
@@ -808,9 +912,11 @@ summary(modelo_log)
 TukeyHSD(modelo_log, conf.level = 0.99)
 ```
 
-Pretendemos avaliar se o Tempo médio de Sobrevivência Global desde o início do tratamento varia para cada Sexo.
-Para tal, sugere-se a realização de uma ANOVA que permita avaliar os efeitos principais e a possível interação entre os grupos.
-Que pode concluir (use α=5%)
+Pretendemos avaliar se o Tempo médio de Sobrevivência Global desde o
+início do tratamento varia para cada Sexo. Para tal, sugere-se a
+realização de uma ANOVA que permita avaliar os efeitos principais e a
+possível interação entre os grupos. Que pode concluir (use α = 5%).
+
 ```{r}
 modelo_2 <- aov(bladder_clin$ERDAFITINIB_TX_OS_MONTHS ~ bladder_clin$SEX)
 summary(modelo_2)
@@ -832,11 +938,14 @@ any(is.na(bladder_clin$SEX) | is.infinite(bladder_clin$SEX))
 #            modelo_2, type = "b", col = c("pink", "blue", "yellow"), legend = TRUE)
 # NÃO FUNCIONA!!!
 ```
+
 # Relação melhor resposta ao Erdafitinib e o tratamento
 
-####Análise de expressão diferencial e de enriquecimento
+#### Análise de expressão diferencial e de enriquecimento
 
-As variáveis a serem consideradas incluem a Melhor resposta ao Erdafitinib (bladder_clin$BEST_RESPONSE) e o tratamento (bladder_clin$ERDAFITINIB_TREATED).
+As variáveis a serem consideradas incluem a Melhor resposta ao
+Erdafitinib
+(bladder_clin$BEST_RESPONSE) e o tratamento (bladder_clin$ERDAFITINIB_TREATED).
 
 ```{r}
 # Estatísticas sumárias de Melhor Resposta ao Erdafitinib para os individuos que estão a fazer o tratamento e  # para os que não estão a fazer.
@@ -852,7 +961,8 @@ boxplot(bladder_clin$BEST_RESPONSE ~ bladder_clin$ERDAFITINIB_TREATED,
         xlab = "Erdafitinib Treated",
         ylab = "Melhor Resposta ao Erdafitinib")
 ```
-###Teste às variancias
+
+### Teste às variancias
 ```{r}
 # Teste de igualdade de variância
 teste_var <- var.test(bladder_clin$BEST_RESPONSE ~ bladder_clin$ERDAFITINIB_TREATED)
@@ -881,14 +991,19 @@ plot(bladder_clin$BEST_RESPONSE,
      xlab = "Tratamento")
 legend("topright", legend = unique(bladder_clin$ERDAFITINIB_TREATED), fill = c("green", "red"))
 ```
-###T-test (teste das médias)
-Efetuamos o teste estatístico mais apropriado, neste caso o t-test os valores médios de Melhor Resposta ao Erdafitinib para os individuos que estão a fazer o tratamento e para os que não estão a fazer.
 
-Hipóteses:
-H0: Não existem diferenças no valor médio da melhor resposta ao tratamento para cada grupo
-H1: Existem diferenças no valor médio da melhor resposta ao tratamento para cada grupo
+### T-test (teste das médias) Efetuamos o teste estatístico mais
+apropriado, neste caso o t-test os valores médios de Melhor Resposta ao
+Erdafitinib para os individuos que estão a fazer o tratamento e para os
+que não estão a fazer.
 
-Teste t para comparar os valores médios da melhor resposta ao tratamento para cada grupo
+Hipóteses: H0: Não existem diferenças no valor médio da melhor resposta
+ao tratamento para cada grupo H1: Existem diferenças no valor médio da
+melhor resposta ao tratamento para cada grupo
+
+Teste t para comparar os valores médios da melhor resposta ao tratamento
+para cada grupo
+
 ```{r}
 teste_t <- t.test(bladder_clin$BEST_RESPONSE ~ bladder_clin$ERDAFITINIB_TREATED, var.equal = TRUE)
 print(teste_t)
