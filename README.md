@@ -4,6 +4,7 @@
 - Christian Neitzel | PG52526
 - Diana Silva | PG52532
 - Tiago Miranda | PG54437
+- Diogo Esteves | PG28935
 
 ### Objetivo do trabalho:
 Este repositório contém uma análise demonstrativa de expressão genética diferencial, utilizando amostras de sequenciamento direcionado de 526 tumores de bexiga e seus normais correspondentes através do MSK-IMPACT. O conjunto de dados selecionado inclui 526 amostras de mais de 400 pacientes, nas quais a expressão genética foi quantificada.
