@@ -1,0 +1,261 @@
+---
+title: "Projeto de Análise de Neoplasia da Bexiga*"
+author: "Christian Neitzel, Diana Silva, Diogo Esteves, Tiago Miranda"
+date: "r format(Sys.time(), '%Y-%m-%d')"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Introdução
+
+Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola de Engenharia da Universidade do Minho. O objetivo central é analisar um conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal Bioconductor. O projeto será dividido em x fases principais.
+
+Fase 1: Exploração e Análise de Dados
+
+A primeira fase compreenderá as seguintes etapas: explicação da origem e relevância dos dados; realização de tarefas de preparação e pré-processamento dos dados; resumo dos dados através de estatísticas descritivas e exploração visual por meio de gráficos; realização de análises estatísticas univariadas; e por fim, análise de expressão diferencial e de enriquecimento.
+
+**Contextualização**
+
+A neoplasia da bexiga representa um desafio global de saúde, sendo uma das formas de cancro mais prevalentes em todo o mundo. Embora a abordagem clínica tenha permanecido largamente inalterada ao longo dos anos, descobertas recentes têm aberto caminho para uma nova era no diagnóstico e gestão da doença (Dyrskjøt et al., 2023). A mortalidade específica começou a diminuir em regiões com maior consciencialização social dos fatores de risco e redução da exposição a agentes carcinogénicos. A remoção cirurgica radical da bexiga continua a ser o padrão-ouro para casos invasivos, enquanto o valor clínico da linfadenectomia e alternativas à quimioterapia perioperatória estão a ser desafiados. Paralelamente, avanços na biologia molecular e na compreensão da tumorigénese estão a abrir caminho para uma medicina personalizada. A detecção precoce é crucial para um melhor prognóstico, e métodos minimamente invasivos de diagnóstico são essenciais (Dobruch & Oszczudłowski, 2021).
+
+**Análise Demonstrativa de Expressão Genética Diferencial**
+
+Este trabalho contém uma análise demonstrativa de expressão genética diferencial, utilizando amostras de sequenciamento direcionado presentes no estudo "Genomic Differences Between "Primary" and "Secondary" Muscle-invasive Bladder Cancer as a Basis for Disparate Outcomes to Cisplatin-based Neoadjuvant Chemotherapy" (https://www.cbioportal.org/study/summary?id=blca_msk_tcga_2020).
+Neste estudo os investigadores tiveram como objetivo, investigar as diferenças genômicas entre o carcinoma de bexiga músculo-invasivo "primário" e "secundário" e como estas diferenças afetam a resposta à quimioterapia neoadjuvante à base de cisplatina.
+Os autores analisaram dados genômicos de 222 pacientes com carcinoma de bexiga músculo-invasivo tratados com quimioterapia neoadjuvante à base de cisplatina. Os pacientes foram divididos em dois grupos: aqueles com carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com carcinoma de bexiga "secundário" (já tratado com quimioterapia ou radiação).
+
+
+## Instalação e importação de packages
+
+Nesta secção, são destacados todos os pacotes utilizados no trabalho, que facilitam a aquisição e análise de dados ao longo do documento, tornando mais eficiente a obtenção e compreensão das informações relevantes. Em primeiro lugar, procedemos à instalação dos pacotes necessários para realizar a análise da expressão diferencial. Isso garante que todas as ferramentas estejam disponíveis para conduzir as análises de forma adequada e precisa.
+```{r}
+# Instalação dos pacotes necessários
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "TCGAbiolinks", "DESeq2"), ask = FALSE)
+
+if (!requireNamespace("GGally", quietly = TRUE))
+  install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
+
+# Carregamento dos pacotes
+library(BiocManager)
+library(GGally)
+library(tibble)
+library(dplyr)
+library(cBioPortalData)
+library(edgeR)
+library(limma)
+library(DESeq2)
+
+# Inicialização da API do cBioPortal
+cbio <- cBioPortal()
+```
+
+# Exploração dos dados presentes no data set
+
+Nesta fase é realizado o carregamento dos dados clinicos do estudo,
+explorados os ensaios do estudo disponiveis e organizados em dataframes:
+
+```{r pressure, echo=FALSE}
+# Obter dados clínicos
+bladder_clin <- clinicalData(api = cbio, studyId = "blca_msk_tcga_2020")
+dim(bladder_clin)  # Deve retornar 476 linhas e 42 colunas
+
+# Carrega os dados do cBioPortal
+bladder = cBioDataPack("blca_msk_tcga_2020", ask = FALSE)
+bladder
+
+# Lista os nomes dos ensaios disponíveis no pacote dos dados do CBioPortal
+names(assays(bladder))
+names(colData(bladder)) # tipos de metadados associados a cada amostra
+
+# Summary dos dados
+summary(bladder)
+```
+Extração dos Metadados
+
+A extração dos metadados é um processo vital na organização e
+compreensão de conjuntos de dados. Os metadados fornecem informações
+essenciais sobre os dados, incluindo sua origem, estrutura, formato e
+significado.
+
+```{r}
+# Consulta dos dados de mrna e conversão em dataframe.
+dados_mrna <- assays(bladder)$mrna_seq_v2_rsem
+dados_mrna_df <- as.data.frame(dados_mrna)
+```
+
+Alteramos alguns nomes das colunas e verificamos se as colunas
+apresentavam valores de NAs
+
+Durante o processo de análise de dados, é comum realizar ajustes na
+estrutura do conjunto de dados para melhorar sua organização e
+compreensão. Uma etapa comum é a alteração dos nomes das colunas para
+torná-los mais descritivos e intuitivos. Isso facilita a interpretação
+dos dados e ajuda na identificação das variáveis.
+
+Além disso, é essencial verificar se as colunas apresentam valores
+ausentes (NAs) após as alterações. Os NAs podem ocorrer por diversos
+motivos, como erros de medição ou falhas na coleta de dados, sendo
+fundamental identificá-los para decidir como tratá-los adequadamente
+durante a análise.
+
+Portanto, após a alteração dos nomes das colunas, é recomendável
+realizar uma verificação minuciosa para garantir a integridade dos dados
+e prepará-los para análises posteriores. Isso contribui para a
+confiabilidade e qualidade dos resultados obtidos a partir do conjunto
+de dados.
+
+```{r}
+# Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
+# Definir as variáveis como fatores
+bladder_clin <- bladder_clin %>%
+  mutate(
+    PFS_STATUS = as.factor(PFS_STATUS),
+    PRIOR_DX = as.factor(PRIOR_DX),
+    RADIATION_THERAPY = as.factor(RADIATION_THERAPY),
+    SEX = as.factor(SEX),
+    DFS_STATUS = as.factor(DFS_STATUS),
+    sampleId = as.factor(sampleId),
+    ANALYSIS_COHORT = as.factor(ANALYSIS_COHORT),
+    CANCER_TYPE = as.factor(CANCER_TYPE),
+    CANCER_TYPE_DETAILED = as.factor(CANCER_TYPE_DETAILED),
+    DISTANT_METS = as.factor(DISTANT_METS),
+    GRADE = as.factor(GRADE),
+    LYMPH_NODE_STATUS = as.factor(LYMPH_NODE_STATUS),
+    ONCOTREE_CODE = as.factor(ONCOTREE_CODE),
+    PRIMARY_VS_SECONDARY = as.factor(PRIMARY_VS_SECONDARY),
+    PRIOR_INTRAVESICAL_CHEMOTHERAPY = as.factor(PRIOR_INTRAVESICAL_CHEMOTHERAPY),
+    SAMPLE_TYPE = as.factor(SAMPLE_TYPE),
+    SOMATIC_STATUS = as.factor(SOMATIC_STATUS),
+    TUMOR_STAGE = as.factor(TUMOR_STAGE),
+    AJCC_PATHOLOGIC_TUMOR_STAGE = as.factor(AJCC_PATHOLOGIC_TUMOR_STAGE),
+    COHORT = as.factor(COHORT),
+    ETHNICITY = as.factor(ETHNICITY),
+    OS_STATUS = as.factor(OS_STATUS),
+    PATH_M_STAGE = as.factor(PATH_M_STAGE),
+    PATH_N_STAGE = as.factor(PATH_N_STAGE),
+    PATH_T_STAGE = as.factor(PATH_T_STAGE),
+    RACE = as.factor(RACE)
+  )
+
+# Definir as variáveis como numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(
+    RAGNUM_HYPOXIA_SCORE = as.numeric(RAGNUM_HYPOXIA_SCORE),
+    WINTER_HYPOXIA_SCORE = as.numeric(WINTER_HYPOXIA_SCORE),
+    DFS_MONTHS = as.numeric(DFS_MONTHS),
+    ANEUPLOIDY_SCORE = as.numeric(ANEUPLOIDY_SCORE),
+    FRACTION_GENOME_ALTERED = as.numeric(FRACTION_GENOME_ALTERED),
+    MSI_SCORE_MANTIS = as.numeric(MSI_SCORE_MANTIS),
+    MSI_SENSOR_SCORE = as.numeric(MSI_SENSOR_SCORE),
+    MUTATION_COUNT = as.numeric(MUTATION_COUNT),
+    TMB_NONSYNONYMOUS = as.numeric(TMB_NONSYNONYMOUS),
+    AGE = as.numeric(AGE),
+    BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
+    OS_MONTHS = as.numeric(OS_MONTHS),
+    PFS_MONTHS = as.numeric(PFS_MONTHS),
+    SAMPLE_COUNT = as.numeric(SAMPLE_COUNT)
+  )
+
+# Substituição dos NAs
+na_columns <- sapply(bladder_clin, function(x) any(is.na(x)))
+
+for (col_name in names(bladder_clin)) {
+  if (na_columns[col_name]) {
+    if (is.numeric(bladder_clin[[col_name]])) {
+      median_val <- median(bladder_clin[[col_name]], na.rm = TRUE)
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- median_val
+    } else {
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- "Unknown"
+    }
+  }
+}
+
+# Verificar se ainda há valores NA
+summary(bladder_clin)
+```
+Normalização dos dados
+```{r}
+# Normalização dos dados
+# Definição da função de Min-Max Scaling
+min_max_scaling <- function(x) {
+  if (is.numeric(x)) {
+    return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+  } else {
+    return(x)
+  }
+}
+
+# Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+
+#######################codigo todo alterado para o novo dataset até aqui#################
+dados_mrna <- dados_mrna %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+
+```
+
+### Análise de Expressão Diferencial
+```{r}
+# Obter dados de expressão
+blca_expr <- expressionData(api = cbio, studyId = "data_mrna_agilent_microarray")
+blca_expr
+
+# Define-se o count_matrix
+count_matrix = blca_expr
+
+# Substituição de valores NA com a mediana de cada coluna
+count_matrix <- apply(count_matrix, 2, function(x) {
+  x[is.na(x)] <- median(x, na.rm = TRUE)
+  return(x)
+})
+
+# Criação de um objeto DESeqDataSet
+dds <- DESeqDataSetFromMatrix(countData = count_matrix,
+                              colData = blca_clin,
+                              design = ~ SEX + CANCER_TYPE_DETAILED)
+
+# Estimar fatores de tamanho e dispersão
+dds <- DESeq(dds)
+
+# Análise de expressão diferencial
+dds <- DESeq(dds)
+res <- results(dds)
+
+# Ajustamento para testes múltiplos
+res <- lfcShrink(dds, contrast = c("SEX", "male", "female"), method = "apeglm")
+
+```
+
+### Análise de Enriquecimento
+```{r}
+# Transformação de dados de contagem
+vsd = varianceStabilizingTransformation(dds, blind = FALSE) 
+
+# 5. Heatmap de distâncias entre amostras
+# Calcular a distância entre as amostras
+sampleDists <- dist(t(assay(vsd)))
+
+# 5.1 Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
+pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
+
+# 5.2 Principal component plot of the samples
+plotPCA(vsd, intgroup = c("condition"))
+```
+```{r}
+```
+### Bibliografia
+
+Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current Challenges and Future Directions. Medicina (Kaunas, Lithuania), 57(8). https://doi.org/10.3390/MEDICINA57080749
+
+Dyrskjøt, L., Hansel, D. E., Efstathiou, J. A., Knowles, M. A., Galsky, M. D., Teoh, J., & Theodorescu, D. (2023). Bladder cancer. Nature Reviews. Disease Primers, 9(1). https://doi.org/10.1038/S41572-023-00468-9
+
+
+```{r}
