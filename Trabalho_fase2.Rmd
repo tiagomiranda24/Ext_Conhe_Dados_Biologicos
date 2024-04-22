@@ -75,25 +75,7 @@ names(colData(bladder)) # tipos de metadados associados a cada amostra
 # Summary dos dados
 summary(bladder)
 ```
-Normalização dos dados
-```{r pressure, echo=FALSE}
-# Definição da função de Min-Max Scaling
-min_max_scaling <- function(x) {
-  min_val <- min(x, na.rm = TRUE)
-  max_val <- max(x, na.rm = TRUE)
-  if(min_val == max_val) return(rep(0, length(x)))
-  (x - min_val) / (max_val - min_val)
-}
 
-# Aplicação do Min-Max Scaling às colunas numéricas
-bladder_clin <- bladder_clin %>%
-  mutate(across(where(is.numeric), min_max_scaling))
-
-# Tratamento de NAs e transformação de dados categóricos
-bladder_clin <- bladder_clin %>%
-  mutate(across(where(is.character), as.factor)) %>%
-  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
-```
 Extração dos Metadados
 
 A extração dos metadados é um processo vital na organização e
@@ -130,6 +112,41 @@ de dados.
 
 ```{r}
 # Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
+# Definir as variáveis como numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(
+    RAGNUM_HYPOXIA_SCORE = as.numeric(RAGNUM_HYPOXIA_SCORE),
+    WINTER_HYPOXIA_SCORE = as.numeric(WINTER_HYPOXIA_SCORE),
+    DFS_MONTHS = as.numeric(DFS_MONTHS),
+    ANEUPLOIDY_SCORE = as.numeric(ANEUPLOIDY_SCORE),
+    FRACTION_GENOME_ALTERED = as.numeric(FRACTION_GENOME_ALTERED),
+    MSI_SCORE_MANTIS = as.numeric(MSI_SCORE_MANTIS),
+    MSI_SENSOR_SCORE = as.numeric(MSI_SENSOR_SCORE),
+    MUTATION_COUNT = as.numeric(MUTATION_COUNT),
+    TMB_NONSYNONYMOUS = as.numeric(TMB_NONSYNONYMOUS),
+    AGE = as.numeric(AGE),
+    BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
+    OS_MONTHS = as.numeric(OS_MONTHS),
+    PFS_MONTHS = as.numeric(PFS_MONTHS),
+    SAMPLE_COUNT = as.numeric(SAMPLE_COUNT)
+  )
+
+# Substitui-se os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown"
+# Substituição dos NAs
+na_columns <- sapply(bladder_clin, function(x) any(is.na(x)))
+
+for (col_name in names(bladder_clin)) {
+  if (na_columns[col_name]) {
+    if (is.numeric(bladder_clin[[col_name]])) {
+      median_val <- median(bladder_clin[[col_name]], na.rm = TRUE)
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- median_val
+    } else {
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- "Unknown"
+    }
+  }
+}
+
+# Tendo os NAs substituidos, podemos agora definir variáveis como fatores
 # Definir as variáveis como fatores
 bladder_clin <- bladder_clin %>%
   mutate(
@@ -161,42 +178,32 @@ bladder_clin <- bladder_clin %>%
     RACE = as.factor(RACE)
   )
 
-# Definir as variáveis como numéricas
-bladder_clin <- bladder_clin %>%
-  mutate(
-    RAGNUM_HYPOXIA_SCORE = as.numeric(RAGNUM_HYPOXIA_SCORE),
-    WINTER_HYPOXIA_SCORE = as.numeric(WINTER_HYPOXIA_SCORE),
-    DFS_MONTHS = as.numeric(DFS_MONTHS),
-    ANEUPLOIDY_SCORE = as.numeric(ANEUPLOIDY_SCORE),
-    FRACTION_GENOME_ALTERED = as.numeric(FRACTION_GENOME_ALTERED),
-    MSI_SCORE_MANTIS = as.numeric(MSI_SCORE_MANTIS),
-    MSI_SENSOR_SCORE = as.numeric(MSI_SENSOR_SCORE),
-    MUTATION_COUNT = as.numeric(MUTATION_COUNT),
-    TMB_NONSYNONYMOUS = as.numeric(TMB_NONSYNONYMOUS),
-    AGE = as.numeric(AGE),
-    BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
-    OS_MONTHS = as.numeric(OS_MONTHS),
-    PFS_MONTHS = as.numeric(PFS_MONTHS),
-    SAMPLE_COUNT = as.numeric(SAMPLE_COUNT)
-  )
-
-# Substituição dos NAs
-na_columns <- sapply(bladder_clin, function(x) any(is.na(x)))
-
-for (col_name in names(bladder_clin)) {
-  if (na_columns[col_name]) {
-    if (is.numeric(bladder_clin[[col_name]])) {
-      median_val <- median(bladder_clin[[col_name]], na.rm = TRUE)
-      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- median_val
-    } else {
-      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- "Unknown"
-    }
-  }
-}
-
 # Verificar se ainda há valores NA
+# Se o código correu bem, as colunas numéricas não vão ter "NA's" e as colunas não munéricas vão ter "Unknown" em vez de "NA's", evitando problemas nos gráficos
 summary(bladder_clin)
 ```
+Normalização dos dados
+```{r pressure, echo=FALSE}
+################ Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ##############################
+
+# Definição da função de Min-Max Scaling
+min_max_scaling <- function(x) {
+  min_val <- min(x, na.rm = TRUE)
+  max_val <- max(x, na.rm = TRUE)
+  if(min_val == max_val) return(rep(0, length(x)))
+  (x - min_val) / (max_val - min_val)
+}
+
+# Aplicação do Min-Max Scaling às colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+
+# Tratamento de NAs e transformação de dados categóricos
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.character), as.factor)) %>%
+  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+```
+
 Normalização dos dados
 ```{r}
 # Normalização dos dados
