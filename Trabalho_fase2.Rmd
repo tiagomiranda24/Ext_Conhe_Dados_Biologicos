@@ -5,40 +5,86 @@ date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document: default
   word_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ## Introdução
 
-Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola de Engenharia da Universidade do Minho. O objetivo central é analisar um conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal Bioconductor. O projeto será dividido em x fases principais.
+Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento
+de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola
+de Engenharia da Universidade do Minho. O objetivo central é analisar um
+conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através
+do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal
+Bioconductor. O projeto será dividido em x fases principais.
 
 ###Fase 1: Exploração e Análise de Dados
 
-A primeira fase compreenderá as seguintes etapas: explicação da origem e relevância dos dados; realização de tarefas de preparação e pré-processamento dos dados; resumo dos dados através de estatísticas descritivas e exploração visual por meio de gráficos; realização de análises estatísticas univariadas; e por fim, análise de expressão diferencial e de enriquecimento.
+A primeira fase compreenderá as seguintes etapas: explicação da origem e
+relevância dos dados; realização de tarefas de preparação e
+pré-processamento dos dados; resumo dos dados através de estatísticas
+descritivas e exploração visual por meio de gráficos; realização de
+análises estatísticas univariadas; e por fim, análise de expressão
+diferencial e de enriquecimento.
 
 **Contextualização**
 
-A neoplasia da bexiga representa um desafio global de saúde, sendo uma das formas de cancro mais prevalentes em todo o mundo. Embora a abordagem clínica tenha permanecido largamente inalterada ao longo dos anos, descobertas recentes têm aberto caminho para uma nova era no diagnóstico e gestão da doença (Dyrskjøt et al., 2023). A mortalidade específica começou a diminuir em regiões com maior consciencialização social dos fatores de risco e redução da exposição a agentes carcinogénicos. A remoção cirurgica radical da bexiga continua a ser o padrão-ouro para casos invasivos, enquanto o valor clínico da linfadenectomia e alternativas à quimioterapia perioperatória estão a ser desafiados. Paralelamente, avanços na biologia molecular e na compreensão da tumorigénese estão a abrir caminho para uma medicina personalizada. A detecção precoce é crucial para um melhor prognóstico, e métodos minimamente invasivos de diagnóstico são essenciais (Dobruch & Oszczudłowski, 2021).
+A neoplasia da bexiga representa um desafio global de saúde, sendo uma
+das formas de cancro mais prevalentes em todo o mundo. Embora a
+abordagem clínica tenha permanecido largamente inalterada ao longo dos
+anos, descobertas recentes têm aberto caminho para uma nova era no
+diagnóstico e gestão da doença (Dyrskjøt et al., 2023). A mortalidade
+específica começou a diminuir em regiões com maior consciencialização
+social dos fatores de risco e redução da exposição a agentes
+carcinogénicos. A remoção cirurgica radical da bexiga continua a ser o
+padrão-ouro para casos invasivos, enquanto o valor clínico da
+linfadenectomia e alternativas à quimioterapia perioperatória estão a
+ser desafiados. Paralelamente, avanços na biologia molecular e na
+compreensão da tumorigénese estão a abrir caminho para uma medicina
+personalizada. A detecção precoce é crucial para um melhor prognóstico,
+e métodos minimamente invasivos de diagnóstico são essenciais (Dobruch &
+Oszczudłowski, 2021).
 
 **Análise Demonstrativa de Expressão Genética Diferencial**
 
-Este trabalho contém uma análise demonstrativa de expressão genética diferencial, utilizando amostras de sequenciamento direcionado presentes no estudo "Genomic Differences Between "Primary" and "Secondary" Muscle-invasive Bladder Cancer as a Basis for Disparate Outcomes to Cisplatin-based Neoadjuvant Chemotherapy" (https://www.cbioportal.org/study/summary?id=blca_msk_tcga_2020).
-Neste estudo os investigadores tiveram como objetivo, investigar as diferenças genômicas entre o carcinoma de bexiga músculo-invasivo "primário" e "secundário" e como estas diferenças afetam a resposta à quimioterapia neoadjuvante à base de cisplatina.
-Os autores analisaram dados genômicos de 222 pacientes com carcinoma de bexiga músculo-invasivo tratados com quimioterapia neoadjuvante à base de cisplatina. Os pacientes foram divididos em dois grupos: aqueles com carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com carcinoma de bexiga "secundário" (já tratado com quimioterapia ou radiação).
-
+Este trabalho contém uma análise demonstrativa de expressão genética
+diferencial, utilizando amostras de sequenciamento direcionado presentes
+no estudo "Genomic Differences Between "Primary" and "Secondary"
+Muscle-invasive Bladder Cancer as a Basis for Disparate Outcomes to
+Cisplatin-based Neoadjuvant Chemotherapy"
+(<https://www.cbioportal.org/study/summary?id=blca_msk_tcga_2020>).
+Neste estudo os investigadores tiveram como objetivo, investigar as
+diferenças genômicas entre o carcinoma de bexiga músculo-invasivo
+"primário" e "secundário" e como estas diferenças afetam a resposta à
+quimioterapia neoadjuvante à base de cisplatina. Os autores analisaram
+dados genômicos de 222 pacientes com carcinoma de bexiga
+músculo-invasivo tratados com quimioterapia neoadjuvante à base de
+cisplatina. Os pacientes foram divididos em dois grupos: aqueles com
+carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com
+carcinoma de bexiga "secundário" (já tratado com quimioterapia ou
+radiação).
 
 ## Instalação e importação de packages
 
-Nesta secção, são destacados todos os pacotes utilizados no trabalho, que facilitam a aquisição e análise de dados ao longo do documento, tornando mais eficiente a obtenção e compreensão das informações relevantes. Em primeiro lugar, procedemos à instalação dos pacotes necessários para realizar a análise da expressão diferencial. Isso garante que todas as ferramentas estejam disponíveis para conduzir as análises de forma adequada e precisa.
+Nesta secção, são destacados todos os pacotes utilizados no trabalho,
+que facilitam a aquisição e análise de dados ao longo do documento,
+tornando mais eficiente a obtenção e compreensão das informações
+relevantes. Em primeiro lugar, procedemos à instalação dos pacotes
+necessários para realizar a análise da expressão diferencial. Isso
+garante que todas as ferramentas estejam disponíveis para conduzir as
+análises de forma adequada e precisa.
 
 ```{r}
 # Instalação dos pacotes necessários
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "TCGAbiolinks", "DESeq2"), ask = FALSE)
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db","org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler"), ask = FALSE)
 
 if (!requireNamespace("GGally", quietly = TRUE))
   install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
@@ -51,6 +97,9 @@ library(DESeq2)
 library(GGally)
 library(dplyr)
 library(tibble)
+library(TCGAbiolinks)
+library(clusterProfiler)
+library(org.Hs.eg.db)
 
 # Inicialização da API do cBioPortal
 cbio <- cBioPortal()
@@ -58,7 +107,8 @@ cbio <- cBioPortal()
 
 # Exploração dos dados presentes no data set
 
-Nesta fase é realizado o carregamento dos dados clinicos do estudo, explorados os ensaios do estudo disponiveis e organizados em dataframes:
+Nesta fase é realizado o carregamento dos dados clinicos do estudo,
+explorados os ensaios do estudo disponiveis e organizados em dataframes:
 
 ```{r pressure, echo=FALSE}
 # Obter dados clínicos
@@ -85,6 +135,17 @@ significado.
 
 ```{r}
 # Consulta dos dados de mrna e conversão em dataframe.
+min_max_scaling <- function(x) {
+  if(all(is.na(x)) || length(unique(na.omit(x))) == 1) {
+    return(rep(0, length(x)))  # Retorna zeros se os valores forem NA ou iguais
+  }
+  min_val <- min(x, na.rm = TRUE)
+  max_val <- max(x, na.rm = TRUE)
+  return((x - min_val) / (max_val - min_val))
+}
+
+#sem o min e max scaling nesta parte ocorre erro no mutate que se segue:
+
 dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
 ```
@@ -182,19 +243,13 @@ bladder_clin <- bladder_clin %>%
 # Se o código correu bem, as colunas numéricas não vão ter "NA's" e as colunas não munéricas vão ter "Unknown" em vez de "NA's", evitando problemas nos gráficos
 summary(bladder_clin)
 ```
+
 Normalização dos dados
+
 ```{r pressure, echo=FALSE}
 ################ Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ##############################
 
-# Definição da função de Min-Max Scaling
-min_max_scaling <- function(x) {
-  min_val <- min(x, na.rm = TRUE)
-  max_val <- max(x, na.rm = TRUE)
-  if(min_val == max_val) return(rep(0, length(x)))
-  (x - min_val) / (max_val - min_val)
-}
-
-# Aplicação do Min-Max Scaling às colunas numéricas
+# Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
 bladder_clin <- bladder_clin %>%
   mutate(across(where(is.numeric), min_max_scaling))
 
@@ -202,21 +257,6 @@ bladder_clin <- bladder_clin %>%
 bladder_clin <- bladder_clin %>%
   mutate(across(where(is.character), as.factor)) %>%
   mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
-```
-
-Normalização dos dados
-```{r}
-# Normalização dos dados
-# Definição da função de Min-Max Scaling
-# Improved Min-Max Scaling function
-min_max_scaling <- function(x) {
-  if(all(is.na(x)) || length(unique(na.omit(x))) == 1) {
-    return(rep(0, length(x)))  # Retorna zeros se os valores forem NA ou iguais
-  }
-  min_val <- min(x, na.rm = TRUE)
-  max_val <- max(x, na.rm = TRUE)
-  return((x - min_val) / (max_val - min_val))
-}
 
 # Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
 bladder_clin <- bladder_clin %>%
@@ -233,58 +273,149 @@ dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
 ```
 
 ### Análise de Expressão Diferencial
+
+Para este passo é necessário pesquisar e Baixar Dados de Expressão
+Genética do TCGA-ACC
+
 ```{r}
 
-#p/continuar proximo passo...Preciso encontrar os perfis geneticos... 
+# Define o projeto
+project <- "TCGA-ACC"
 
+# Configura a consulta com o tipo de amostra correto
+query <- GDCquery(project = project,
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification",
+                  workflow.type = "STAR - Counts",
+                  sample.type = "Primary Tumor")
 
-# Inicialização da API do cBioPortal
-cbio <- cBioPortal()
+# Baixa os dados
+GDCdownload(query)
 
-# Obter dados de expressão usando a função personalizada
-blca_expr <- expressionData(api = cbio, studyId = "blca_msk_tcga_2020")
-
-# Verifica se os dados foram carregados corretamente
-if (is.null(blca_expr)) {
-  stop("Failed to load expression data.")
-}
-
-# Tratamento dos dados
-count_matrix <- assay(blca_expr)  # Converte SummarizedExperiment para matrix
-
-# Substituição de valores NA com a mediana de cada coluna
-count_matrix <- apply(count_matrix, 2, function(x) {
-  x[is.na(x)] <- median(x, na.rm = TRUE)
-  return(x)
-})
-
-# Preparação dos metadados das amostras para DESeq2
-# Certifique-se de que `blca_clin` está corretamente definido e sincronizado com `count_matrix`
-if (!all(rownames(blca_clin) %in% colnames(count_matrix))) {
-  stop("Mismatch in sample identifiers between clinical data and expression data.")
-}
-
-# Criação de um objeto DESeqDataSet
-dds <- DESeqDataSetFromMatrix(countData = count_matrix,
-                              colData = blca_clin,
-                              design = ~ SEX + CANCER_TYPE_DETAILED)
-
-# Estimação de tamanho de fatores e dispersão
-dds <- DESeq(dds)
-
-# Análise de expressão diferencial
-res <- results(dds, contrast = c("SEX", "male", "female"))
-
-# Ajustamento para testes múltiplos usando apeglm
-res <- lfcShrink(dds, coef = "SEX_male_vs_female", method = "apeglm")
-
-# Exibir ou salvar os resultados
-print(head(res))
-
+# Prepara os dados para análise
+data <- GDCprepare(query)
 
 ```
 
+O próximo comando lista tanto dos dados clínicos colData(data) quanto
+dos dados de expressão rowData(data) para futuras analises:
+
+```{r}
+colData(data) 
+rowData(data)
+names(assays(data))
+```
+
+```{r}
+# Análise de Expressão Diferencial:
+
+library(DESeq2)
+
+# Suponho que o nome do ensaio correto seja o "unstranded"
+dds <- DESeqDataSetFromMatrix(countData = assay(data, "unstranded"),
+                              colData = colData(data),
+                              design = ~ gender)  # Ou outra variável de interesse
+
+dds <- DESeq(dds)
+res <- results(dds)
+summary(res)
+
+```
+
+#### Interpretação dos Resultados
+
+Total de Genes Analisados: 52,766 genes com contagem total de leituras
+não zero.
+
+Genes Significativamente Regulados: 1.371 genes mostraram mudança
+significativa de expressão ao nível de ajuste de p-valor \< 0.1.
+
+Genes Regulados para Cima: 607 genes (1.2% do total analisado).
+
+Genes Regulados para Baixo: 776 genes (1.5% do total analisado).
+
+Filtros de Contagem Baixa: 23,356 genes (44% do total) tiveram contagens
+médias inferiores a 1, o que indica baixa expressão geral nesses genes,
+impactando a precisão das estimativas de dispersão e consequentemente
+dos testes.
+
+```{r}
+#Visualização dos Resultados:
+#Volcano Plot
+library(EnhancedVolcano)
+EnhancedVolcano(res,
+                lab = rownames(res),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano plot',
+                pCutoff = 0.1,
+                FCcutoff = 0.5)
+
+```
+```{r}
+#Heatmaps:
+library(pheatmap)
+topVarGenes <- head(order(rowVars(assay(dds)), decreasing = TRUE), 100)
+mat <- assay(dds)[topVarGenes, ]
+pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean")
+
+```
 ### Análise de Enriquecimento
+Análise de Enriquecimento Funcional
+para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
+```{r}
+# Verificar tipos de chaves disponíveis em org.Hs.eg.db
+keytypes(org.Hs.eg.db)
+# Verificar alguns dos identificadores atuais
+head(gene_list_up)
+
+
+# Remover as versões dos Ensembl IDs
+gene_list_up_simplified <- gsub("\\..+$", "", gene_list_up)
+
+# Tentar a conversão novamente usando os IDs simplificados
+gene_list_up_entrez <- select(org.Hs.eg.db, 
+                              keys = gene_list_up_simplified, 
+                              columns = "ENTREZID", 
+                              keytype = "ENSEMBL")
+
+# Verificar os resultados da conversão
+head(gene_list_up_entrez)
+
+```
+```{r}
+library(clusterProfiler)
+
+# Realizar a análise de enriquecimento para os genes up-regulated
+enrich_res_up <- enrichGO(gene         = gene_list_up_entrez$ENTREZID,
+                          OrgDb        = org.Hs.eg.db,
+                          keyType      = "ENTREZID",
+                          ont          = "BP",
+                          pAdjustMethod= "BH",
+                          qvalueCutoff = 0.05)
+
+# Verificar os resultados da análise de enriquecimento
+if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
+  print(summary(enrich_res_up))
+} else {
+  print("No significant enrichment found.")
+}
+
+```
+#### Resultados de Enriquecimento
+
+```{r}
+# Visualizar os resultados de enriquecimento se houver dados significativos
+if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
+  library(enrichplot)
+  dotplot(enrich_res_up) + ggtitle("Enrichment Results for Up-Regulated Genes")
+} else {
+  print("No significant enrichment to plot.")
+}
+```
+##### Interpretação dos Resultados de Enriquecimento
+e fico por aqui que estou cansado, continuo depois.... ou.... se tiverem a gentileza de fazerem esta parte chata agradeço xD
+
 ```{r}
 # Transformação de dados de contagem
 vsd = varianceStabilizingTransformation(dds, blind = FALSE) 
@@ -299,13 +430,21 @@ pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_di
 # 5.2 Principal component plot of the samples
 plotPCA(vsd, intgroup = c("condition"))
 ```
+
 ```{r}
+
+
 ```
+
 ### Bibliografia
 
-Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current Challenges and Future Directions. Medicina (Kaunas, Lithuania), 57(8). https://doi.org/10.3390/MEDICINA57080749
+Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current
+Challenges and Future Directions. Medicina (Kaunas, Lithuania), 57(8).
+<https://doi.org/10.3390/MEDICINA57080749>
 
-Dyrskjøt, L., Hansel, D. E., Efstathiou, J. A., Knowles, M. A., Galsky, M. D., Teoh, J., & Theodorescu, D. (2023). Bladder cancer. Nature Reviews. Disease Primers, 9(1). https://doi.org/10.1038/S41572-023-00468-9
+Dyrskjøt, L., Hansel, D. E., Efstathiou, J. A., Knowles, M. A., Galsky,
+M. D., Teoh, J., & Theodorescu, D. (2023). Bladder cancer. Nature
+Reviews. Disease Primers, 9(1).
+<https://doi.org/10.1038/S41572-023-00468-9>
 
-
-```{r}
+\`\`\`{r}
