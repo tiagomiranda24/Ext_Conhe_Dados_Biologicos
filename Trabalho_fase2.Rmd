@@ -1,7 +1,7 @@
 ---
-title: "Projeto de Análise de Neoplasia da Bexiga*"
+title: "Projeto de Análise de Neoplasia da Bexiga"
 author: "Christian Neitzel, Diana Silva, Diogo Esteves, Tiago Miranda"
-date: "r format(Sys.time(), '%Y-%m-%d')"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document: default
   word_document: default
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola de Engenharia da Universidade do Minho. O objetivo central é analisar um conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal Bioconductor. O projeto será dividido em x fases principais.
 
-Fase 1: Exploração e Análise de Dados
+###Fase 1: Exploração e Análise de Dados
 
 A primeira fase compreenderá as seguintes etapas: explicação da origem e relevância dos dados; realização de tarefas de preparação e pré-processamento dos dados; resumo dos dados através de estatísticas descritivas e exploração visual por meio de gráficos; realização de análises estatísticas univariadas; e por fim, análise de expressão diferencial e de enriquecimento.
 
@@ -32,6 +32,7 @@ Os autores analisaram dados genômicos de 222 pacientes com carcinoma de bexiga 
 ## Instalação e importação de packages
 
 Nesta secção, são destacados todos os pacotes utilizados no trabalho, que facilitam a aquisição e análise de dados ao longo do documento, tornando mais eficiente a obtenção e compreensão das informações relevantes. Em primeiro lugar, procedemos à instalação dos pacotes necessários para realizar a análise da expressão diferencial. Isso garante que todas as ferramentas estejam disponíveis para conduzir as análises de forma adequada e precisa.
+
 ```{r}
 # Instalação dos pacotes necessários
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -43,14 +44,13 @@ if (!requireNamespace("GGally", quietly = TRUE))
   install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
 
 # Carregamento dos pacotes
-library(BiocManager)
-library(GGally)
-library(tibble)
-library(dplyr)
 library(cBioPortalData)
 library(edgeR)
 library(limma)
 library(DESeq2)
+library(GGally)
+library(dplyr)
+library(tibble)
 
 # Inicialização da API do cBioPortal
 cbio <- cBioPortal()
@@ -58,8 +58,7 @@ cbio <- cBioPortal()
 
 # Exploração dos dados presentes no data set
 
-Nesta fase é realizado o carregamento dos dados clinicos do estudo,
-explorados os ensaios do estudo disponiveis e organizados em dataframes:
+Nesta fase é realizado o carregamento dos dados clinicos do estudo, explorados os ensaios do estudo disponiveis e organizados em dataframes:
 
 ```{r pressure, echo=FALSE}
 # Obter dados clínicos
@@ -68,7 +67,6 @@ dim(bladder_clin)  # Deve retornar 476 linhas e 42 colunas
 
 # Carrega os dados do cBioPortal
 bladder = cBioDataPack("blca_msk_tcga_2020", ask = FALSE)
-bladder
 
 # Lista os nomes dos ensaios disponíveis no pacote dos dados do CBioPortal
 names(assays(bladder))
@@ -76,6 +74,25 @@ names(colData(bladder)) # tipos de metadados associados a cada amostra
 
 # Summary dos dados
 summary(bladder)
+```
+Normalização dos dados
+```{r pressure, echo=FALSE}
+# Definição da função de Min-Max Scaling
+min_max_scaling <- function(x) {
+  min_val <- min(x, na.rm = TRUE)
+  max_val <- max(x, na.rm = TRUE)
+  if(min_val == max_val) return(rep(0, length(x)))
+  (x - min_val) / (max_val - min_val)
+}
+
+# Aplicação do Min-Max Scaling às colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+
+# Tratamento de NAs e transformação de dados categóricos
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.character), as.factor)) %>%
+  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
 ```
 Extração dos Metadados
 
@@ -86,8 +103,8 @@ significado.
 
 ```{r}
 # Consulta dos dados de mrna e conversão em dataframe.
-dados_mrna <- assays(bladder)$mrna_seq_v2_rsem
-dados_mrna_df <- as.data.frame(dados_mrna)
+dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
+  mutate(across(where(is.numeric), min_max_scaling))
 ```
 
 Alteramos alguns nomes das colunas e verificamos se as colunas
@@ -184,32 +201,49 @@ Normalização dos dados
 ```{r}
 # Normalização dos dados
 # Definição da função de Min-Max Scaling
+# Improved Min-Max Scaling function
 min_max_scaling <- function(x) {
-  if (is.numeric(x)) {
-    return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
-  } else {
-    return(x)
+  if(all(is.na(x)) || length(unique(na.omit(x))) == 1) {
+    return(rep(0, length(x)))  # Retorna zeros se os valores forem NA ou iguais
   }
+  min_val <- min(x, na.rm = TRUE)
+  max_val <- max(x, na.rm = TRUE)
+  return((x - min_val) / (max_val - min_val))
 }
 
 # Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
 bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .))) %>%
+  mutate(across(where(is.character), as.factor)) %>%
+  mutate(across(c(RAGNUM_HYPOXIA_SCORE, WINTER_HYPOXIA_SCORE, DFS_MONTHS, ANEUPLOIDY_SCORE, 
+                  FRACTION_GENOME_ALTERED, MSI_SCORE_MANTIS, MSI_SENSOR_SCORE, MUTATION_COUNT, 
+                  TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS, SAMPLE_COUNT), as.numeric))
+
+dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
 
 #######################codigo todo alterado para o novo dataset até aqui#################
-dados_mrna <- dados_mrna %>%
-  mutate(across(where(is.numeric), min_max_scaling))
-
 ```
 
 ### Análise de Expressão Diferencial
 ```{r}
-# Obter dados de expressão
-blca_expr <- expressionData(api = cbio, studyId = "data_mrna_agilent_microarray")
-blca_expr
 
-# Define-se o count_matrix
-count_matrix = blca_expr
+#p/continuar proximo passo...Preciso encontrar os perfis geneticos... 
+
+
+# Inicialização da API do cBioPortal
+cbio <- cBioPortal()
+
+# Obter dados de expressão usando a função personalizada
+blca_expr <- expressionData(api = cbio, studyId = "blca_msk_tcga_2020")
+
+# Verifica se os dados foram carregados corretamente
+if (is.null(blca_expr)) {
+  stop("Failed to load expression data.")
+}
+
+# Tratamento dos dados
+count_matrix <- assay(blca_expr)  # Converte SummarizedExperiment para matrix
 
 # Substituição de valores NA com a mediana de cada coluna
 count_matrix <- apply(count_matrix, 2, function(x) {
@@ -217,20 +251,29 @@ count_matrix <- apply(count_matrix, 2, function(x) {
   return(x)
 })
 
+# Preparação dos metadados das amostras para DESeq2
+# Certifique-se de que `blca_clin` está corretamente definido e sincronizado com `count_matrix`
+if (!all(rownames(blca_clin) %in% colnames(count_matrix))) {
+  stop("Mismatch in sample identifiers between clinical data and expression data.")
+}
+
 # Criação de um objeto DESeqDataSet
 dds <- DESeqDataSetFromMatrix(countData = count_matrix,
                               colData = blca_clin,
                               design = ~ SEX + CANCER_TYPE_DETAILED)
 
-# Estimar fatores de tamanho e dispersão
+# Estimação de tamanho de fatores e dispersão
 dds <- DESeq(dds)
 
 # Análise de expressão diferencial
-dds <- DESeq(dds)
-res <- results(dds)
+res <- results(dds, contrast = c("SEX", "male", "female"))
 
-# Ajustamento para testes múltiplos
-res <- lfcShrink(dds, contrast = c("SEX", "male", "female"), method = "apeglm")
+# Ajustamento para testes múltiplos usando apeglm
+res <- lfcShrink(dds, coef = "SEX_male_vs_female", method = "apeglm")
+
+# Exibir ou salvar os resultados
+print(head(res))
+
 
 ```
 
