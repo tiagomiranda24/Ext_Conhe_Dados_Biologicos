@@ -132,6 +132,19 @@ A extração dos metadados é um processo vital na organização e
 compreensão de conjuntos de dados. Os metadados fornecem informações
 essenciais sobre os dados, incluindo sua origem, estrutura, formato e
 significado.
+```{r}
+# Informações (Descrição, citação e PubMed ID do artigo) presentes no ficheiro "meta_study.txt"
+meta_study <- read.delim("blca_msk_tcga_2020\\meta_study.txt", sep = ":", 
+                         header = FALSE, 
+                         row.names = 1, 
+                         col.names = c("", "data")
+                         )
+
+meta_study["description", "data"] # Descrição
+meta_study["citation", "data"]    # Citação
+meta_study["pmid", "data"]        # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
+```
+
 
 ```{r}
 # Consulta dos dados de mrna e conversão em dataframe.
@@ -243,6 +256,27 @@ bladder_clin <- bladder_clin %>%
 # Se o código correu bem, as colunas numéricas não vão ter "NA's" e as colunas não munéricas vão ter "Unknown" em vez de "NA's", evitando problemas nos gráficos
 summary(bladder_clin)
 ```
+
+
+```{r}
+# Pairplot para ver os gráficos das correlações possíveis entre colunas
+
+# Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
+numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
+
+# Criação de um pairplot com só as colunas numéricas para verificar as correlações
+pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+                            upper = list(continuous = wrap("cor", size = 2))) +
+  theme(text = element_text(size = 4),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 4))
+pairplot
+
+ggsave("pairplot_blca.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory
+
+
+```
+
 
 Normalização dos dados
 
