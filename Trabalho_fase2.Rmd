@@ -293,11 +293,11 @@ pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf,
   theme(text = element_text(size = 4),
         axis.text.x = element_text(angle = 45, hjust = 1),
         strip.text = element_text(size = 4),
-        panel.spacing = unit(0.1, "lines")) # Adjust panel spacing
+        panel.spacing = unit(0.1, "lines")) # Ajusta espaços entre os gráficos/painéis
 
 pairplot
 
-ggsave("pairplot_blca.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory, caso queiram ver o gráfico, ele está disponível na mesma pasta que este ficheiro .Rmd!
+ggsave("pairplot_blca.png", pairplot, width = 8, height = 8) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
 ```
 
 
