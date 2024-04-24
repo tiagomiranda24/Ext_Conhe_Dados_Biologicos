@@ -297,7 +297,7 @@ pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf,
 
 pairplot
 
-ggsave("pairplot_blca.png", pairplot, width = 8, height = 8) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
+ggsave("pairplot_blca.png", pairplot, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
 ```
 
 
@@ -321,7 +321,7 @@ bladder_clin <- bladder_clin %>%
   mutate(across(where(is.character), as.factor)) %>%
   mutate(across(c(RAGNUM_HYPOXIA_SCORE, WINTER_HYPOXIA_SCORE, DFS_MONTHS, ANEUPLOIDY_SCORE, 
                   FRACTION_GENOME_ALTERED, MSI_SCORE_MANTIS, MSI_SENSOR_SCORE, MUTATION_COUNT, 
-                  TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS, SAMPLE_COUNT), as.numeric))
+                  TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS), as.numeric))
 
 dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
