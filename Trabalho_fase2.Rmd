@@ -23,7 +23,7 @@ conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através
 do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal
 Bioconductor. O projeto será dividido em x fases principais.
 
-###Fase 1: Exploração e Análise de Dados
+### Fase 1: Exploração e Análise de Dados
 
 A primeira fase compreenderá as seguintes etapas: explicação da origem e
 relevância dos dados; realização de tarefas de preparação e
@@ -79,16 +79,21 @@ necessários para realizar a análise da expressão diferencial. Isso
 garante que todas as ferramentas estejam disponíveis para conduzir as
 análises de forma adequada e precisa.
 
-```{r}
+```{r, include=FALSE}
 # Instalação dos pacotes necessários
+
+### Só é necessário correr este código se os pacotes ainda não foram instalados ou se estão desatualizados! Caso já estejam, podem saltar para o carregamento dos pacotes! ###
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db","org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler"), ask = FALSE)
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db","org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano"), ask = FALSE)
 
 if (!requireNamespace("GGally", quietly = TRUE))
   install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
+```
 
+```{r, include=FALSE}
 # Carregamento dos pacotes
 library(cBioPortalData)
 library(edgeR)
@@ -100,17 +105,24 @@ library(tibble)
 library(TCGAbiolinks)
 library(clusterProfiler)
 library(org.Hs.eg.db)
+library(EnhancedVolcano)
 
-# Inicialização da API do cBioPortal
-cbio <- cBioPortal()
 ```
 
-# Exploração dos dados presentes no data set
+# Exploração dos dados presentes no dataset
 
 Nesta fase é realizado o carregamento dos dados clinicos do estudo,
 explorados os ensaios do estudo disponiveis e organizados em dataframes:
 
 ```{r pressure, echo=FALSE}
+## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
+
+# Define a working directory deste ficheiro para à diretoria atual dela automáticamente
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+# Inicialização da API do cBioPortal
+cbio <- cBioPortal()
+
 # Obter dados clínicos
 bladder_clin <- clinicalData(api = cbio, studyId = "blca_msk_tcga_2020")
 dim(bladder_clin)  # Deve retornar 476 linhas e 42 colunas
@@ -126,7 +138,7 @@ names(colData(bladder)) # tipos de metadados associados a cada amostra
 summary(bladder)
 ```
 
-Extração dos Metadados
+# Extração dos Metadados
 
 A extração dos metadados é um processo vital na organização e
 compreensão de conjuntos de dados. Os metadados fornecem informações
@@ -139,6 +151,8 @@ meta_study <- read.delim("blca_msk_tcga_2020\\meta_study.txt", sep = ":",
                          row.names = 1, 
                          col.names = c("", "data")
                          )
+
+meta_study$data <- trimws(meta_study$data) # Remove leading spaces na coluna "data"
 
 meta_study["description", "data"] # Descrição
 meta_study["citation", "data"]    # Citação
@@ -205,7 +219,8 @@ bladder_clin <- bladder_clin %>%
     SAMPLE_COUNT = as.numeric(SAMPLE_COUNT)
   )
 
-# Substitui-se os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown"
+# Vamos substituir os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown". Define-se primeiro as colunas numéricas para conseguirmos correr o nosso código de substituição dos NAs.
+
 # Substituição dos NAs
 na_columns <- sapply(bladder_clin, function(x) any(is.na(x)))
 
@@ -220,7 +235,8 @@ for (col_name in names(bladder_clin)) {
   }
 }
 
-# Tendo os NAs substituidos, podemos agora definir variáveis como fatores
+# Tendo os NAs substituidos, podemos agora definir variáveis como fatores:
+
 # Definir as variáveis como fatores
 bladder_clin <- bladder_clin %>%
   mutate(
@@ -252,36 +268,43 @@ bladder_clin <- bladder_clin %>%
     RACE = as.factor(RACE)
   )
 
+# Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
+bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
+
 # Verificar se ainda há valores NA
-# Se o código correu bem, as colunas numéricas não vão ter "NA's" e as colunas não munéricas vão ter "Unknown" em vez de "NA's", evitando problemas nos gráficos
 summary(bladder_clin)
+
+# Para saber se a substituição dos NAs ocorreu, verifica os resultados do "summary(bladder_clin)", se ainda aparecerem "NA's", algo está mal, se não houverem "NA's" nas colunas numéricas e houverem valores "Unknown" nas colunas não numéricas, está tudo certo!
+
 ```
 
 
 ```{r}
-# Pairplot para ver os gráficos das correlações possíveis entre colunas
+### Este código é puramente opcional e podemos evitar corrê-lo, ele não tem quaisquer inteferências com os códigos seguintes! ###
 
+# Pairplot para ver os gráficos das correlações possíveis entre colunas
 # Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
 numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
 
 # Criação de um pairplot com só as colunas numéricas para verificar as correlações
 pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
-                            upper = list(continuous = wrap("cor", size = 2))) +
+                            upper = list(continuous = wrap("cor", size = 2, color = "brown")),
+                            lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
   theme(text = element_text(size = 4),
         axis.text.x = element_text(angle = 45, hjust = 1),
-        strip.text = element_text(size = 4))
+        strip.text = element_text(size = 4),
+        panel.spacing = unit(0.1, "lines")) # Adjust panel spacing
+
 pairplot
 
-ggsave("pairplot_blca.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory
-
-
+ggsave("pairplot_blca.png", pairplot) # Guarda o pairplot como uma imagem .png no working directory, caso queiram ver o gráfico, ele está disponível na mesma pasta que este ficheiro .Rmd!
 ```
 
 
 Normalização dos dados
 
 ```{r pressure, echo=FALSE}
-################ Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ##############################
+### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ###
 
 # Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
 bladder_clin <- bladder_clin %>%
@@ -312,7 +335,6 @@ Para este passo é necessário pesquisar e Baixar Dados de Expressão
 Genética do TCGA-ACC
 
 ```{r}
-
 # Define o projeto
 project <- "TCGA-ACC"
 
@@ -376,7 +398,7 @@ dos testes.
 ```{r}
 #Visualização dos Resultados:
 #Volcano Plot
-library(EnhancedVolcano)
+#library(EnhancedVolcano) # Pacote está a ser aberto no chunk "Carregamento dos Pacotes"
 EnhancedVolcano(res,
                 lab = rownames(res),
                 x = 'log2FoldChange',
@@ -394,17 +416,23 @@ mat <- assay(dds)[topVarGenes, ]
 pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean")
 
 ```
+
 ### Análise de Enriquecimento
 Análise de Enriquecimento Funcional
 para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
+
 ```{r}
 # Verificar tipos de chaves disponíveis em org.Hs.eg.db
 keytypes(org.Hs.eg.db)
+
 # Verificar alguns dos identificadores atuais
-head(gene_list_up)
+#head(gene_list_up)
 
 # Identificar genes up-regulated (ajuste aqui conforme o seu critério, por exemplo, p-valor ajustado < 0.05 e log2FoldChange > log2(1.5))
 gene_list_up <- rownames(res)[which(res$padj < 0.05 & res$log2FoldChange > log2(1.5))]
+
+# Verificar alguns dos identificadores atuais após identificar genes up-regulated
+head(gene_list_up)
 
 # Remover as versões dos Ensembl IDs
 gene_list_up_simplified <- gsub("\\..+$", "", gene_list_up)
@@ -419,6 +447,7 @@ gene_list_up_entrez <- select(org.Hs.eg.db,
 head(gene_list_up_entrez)
 
 ```
+
 ```{r}
 library(clusterProfiler)
 
@@ -438,6 +467,7 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 }
 
 ```
+
 #### Resultados de Enriquecimento
 
 ```{r}
@@ -449,6 +479,7 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
   print("No significant enrichment to plot.")
 }
 ```
+
 ##### Interpretação dos Resultados de Enriquecimento
 e fico por aqui que estou cansado, continuo depois.... ou.... se tiverem a gentileza de fazerem esta parte chata agradeço xD
 
@@ -461,10 +492,14 @@ vsd = varianceStabilizingTransformation(dds, blind = FALSE)
 sampleDists <- dist(t(assay(vsd)))
 
 # 5.1 Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
-pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
+#pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
+pheatmap(sampleDists, col = heat.colors(10))
 
+
+######### Ver este ultimo tópico que não está a correr
 # 5.2 Principal component plot of the samples
-plotPCA(vsd, intgroup = c("condition"))
+#plotPCA(vsd, intgroup = c("condition"))
+plotPCA(vsd, intgroup = "condition")
 ```
 
 ```{r}
