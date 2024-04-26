@@ -7,8 +7,10 @@
 - Diogo Esteves | PG28935
 
 ### Objetivo do trabalho:
-Este repositório contém uma análise demonstrativa de expressão genética diferencial, utilizando amostras de sequenciamento direcionado de 526 tumores de bexiga e seus normais correspondentes através do MSK-IMPACT. O conjunto de dados selecionado inclui 526 amostras de mais de 400 pacientes, nas quais a expressão genética foi quantificada.
+Este repositório apresenta uma análise de expressão genética diferencial, utilizando amostras de tumores de bexiga e os tecidos normais correspondentes, obtidos por sequenciação direcionada através do MSK-IMPACT. O conjunto de dados abrange 476 pares tumorais/normais de bexiga invasiva por músculo, sequenciados tanto por TCGA quanto por MSK-IMPACT. Inclui ainda 476 amostras de pacientes distintos, onde a expressão genética foi quantificada.Este repositório apresenta uma análise de expressão genética diferencial, utilizando amostras de tumores de bexiga e os tecidos normais correspondentes, obtidos por sequenciação direcionada através do MSK-IMPACT. O conjunto de dados abrange 476 pares tumorais/normais de bexiga invasiva por músculo, sequenciados tanto por TCGA quanto por MSK-IMPACT. Inclui ainda 476 amostras de pacientes distintos, onde a expressão genética foi quantificada.
+
+### Estudo
+https://pubmed.ncbi.nlm.nih.gov/30290956/
 
 ### Conjunto de Dados selecionados:
-https://portal.gdc.cancer.gov/projects/TCGA-ACC
-https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000178.v11.p8&phv=354519&phd=&pha=&pht=7516&phvf=&phdf=&phaf=&phtf=&dssp=1&consent=&temp=1
+https://www.cbioportal.org/study/summary?id=blca_msk_tcga_2020
