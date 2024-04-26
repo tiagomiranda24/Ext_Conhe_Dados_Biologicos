@@ -1,0 +1,55 @@
+# hierarchical clustering - cachexia
+
+download.file("http://darwin.di.uminho.pt/dataAnalysisR/cachexia.csv", "cachexia.csv")
+download.file("http://darwin.di.uminho.pt/dataAnalysisR/meta_cachexia.csv", "meta.csv")
+
+cachexia <- read.table("cachexia.csv", sep = ",", header = TRUE, row.names = 1)
+meta_cachexia <- read.table("meta.csv", sep = ",", header = TRUE, row.names = 1)
+meta_cachexia$Muscle.loss <- as.factor(meta_cachexia$Muscle.loss)
+cachexia <- cbind(cachexia, meta_cachexia)
+dim(cachexia)
+
+# Escalonamento dos dados
+cachexia.sc <- scale(cachexia[, 1:63])
+
+# Cálculo da distância
+dist.cachexia <- dist(cachexia.sc, method = "manhattan")
+
+# Clustering hierárquico
+cl.cachexia <- hclust(dist.cachexia, method = "average")
+
+# Função para plotar o dendrograma com cores de acordo com a variável Muscle.loss
+
+# Definição da função my.plot.hc
+my.plot.hc <- function(hclust, lab = 1:length(hclust$order), 
+                        lab.col = rep(1, length(hclust$order)), 
+                        hang = 0.1, ...)
+{
+  y <- rep(hclust$height, 2)
+  x <- as.numeric(hclust$merge)
+  y <- y[which(x < 0)]
+  x <- x[which(x < 0)]
+  x <- abs(x)
+  y <- y[order(x)]
+  x <- x[order(x)]
+  plot(hclust, labels = FALSE, hang = hang, ...)
+  text(x = x, y = y[hclust$order] - (max(hclust$height) * hang), 
+       labels = lab[hclust$order], col = lab.col[hclust$order], 
+       srt = 90, adj = c(1,0.5), xpd = NA, ...)
+}
+
+
+my.plot.hc(cl.cachexia, lab.col = as.integer(cachexia$Muscle.loss) + 1, cex = 0.6)
+
+##################################################################
+
+# redução da dimensionalidade usando PCA (Análise de Componentes Principais),
+
+
+# Executar PCA no dataset cachexia
+pca_cach <- prcomp(cachexia[, 1:63], scale = TRUE)
+summary(pca_cach)
+
+# Plotar os componentes principais com cores de acordo com a variável Muscle.loss
+plot(pca_cach$x, col = as.integer(cachexia$Muscle.loss), pch = 19)
+legend(-5, -10, legend = levels(cachexia$Muscle.loss), col = c("black", "red"), pch = 19)
