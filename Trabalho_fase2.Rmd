@@ -192,6 +192,14 @@ para garantir a integridade dos dados e prepará-los para análises posteriores.
 Isso contribui para a confiabilidade e qualidade dos resultados obtidos a partir 
 do conjunto de dados.
 ```{r}
+# Para verificar as classes das colunas do conjunto de dados:
+unlist(lapply(bladder_clin, class))
+
+# Para verificar os tipos das colunas do conjunto de dados:
+unlist(lapply(bladder_clin, typeof))
+```
+
+```{r}
 # Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
 # Definir as variáveis como numéricas
 bladder_clin <- bladder_clin %>%
@@ -497,7 +505,7 @@ pheatmap(sampleDists, col = heat.colors(10))
 
 
 ######### Ver este ultimo tópico que não está a correr
-# Principal component plot of the samples
+Principal component plot of the samples
 #plotPCA(vsd, intgroup = c("condition"))
 plotPCA(vsd, intgroup = "condition")
 ```
