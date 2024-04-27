@@ -23,15 +23,6 @@ conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através
 do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal
 Bioconductor. O projeto será dividido em x fases principais.
 
-### Fase 1: Exploração e Análise de Dados
-
-A primeira fase compreenderá as seguintes etapas: explicação da origem e
-relevância dos dados; realização de tarefas de preparação e
-pré-processamento dos dados; resumo dos dados através de estatísticas
-descritivas e exploração visual por meio de gráficos; realização de
-análises estatísticas univariadas; e por fim, análise de expressão
-diferencial e de enriquecimento.
-
 **Contextualização**
 
 A neoplasia da bexiga representa um desafio global de saúde, sendo uma
@@ -62,14 +53,23 @@ Neste estudo os investigadores tiveram como objetivo, investigar as
 diferenças genômicas entre o carcinoma de bexiga músculo-invasivo
 "primário" e "secundário" e como estas diferenças afetam a resposta à
 quimioterapia neoadjuvante à base de cisplatina. Os autores analisaram
-dados genômicos de 222 pacientes com carcinoma de bexiga
+dados genômicos de pacientes com carcinoma de bexiga
 músculo-invasivo tratados com quimioterapia neoadjuvante à base de
 cisplatina. Os pacientes foram divididos em dois grupos: aqueles com
 carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com
 carcinoma de bexiga "secundário" (já tratado com quimioterapia ou
 radiação).
 
-## Instalação e importação de packages
+### Fase 1: Exploração e Análise de Dados
+
+A primeira fase compreenderá as seguintes etapas: explicação da origem e
+relevância dos dados; realização de tarefas de preparação e
+pré-processamento dos dados; resumo dos dados através de estatísticas
+descritivas e exploração visual por meio de gráficos; realização de
+análises estatísticas univariadas; e por fim, análise de expressão
+diferencial e de enriquecimento.
+
+#### Instalação e importação de packages
 
 Nesta secção, são destacados todos os pacotes utilizados no trabalho,
 que facilitam a aquisição e análise de dados ao longo do documento,
@@ -177,27 +177,20 @@ dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
 ```
 
-Alteramos alguns nomes das colunas e verificamos se as colunas
-apresentavam valores de NAs
+Verificamos se as colunas apresentavam valores de NAs
 
 Durante o processo de análise de dados, é comum realizar ajustes na
 estrutura do conjunto de dados para melhorar sua organização e
-compreensão. Uma etapa comum é a alteração dos nomes das colunas para
-torná-los mais descritivos e intuitivos. Isso facilita a interpretação
-dos dados e ajuda na identificação das variáveis.
-
-Além disso, é essencial verificar se as colunas apresentam valores
-ausentes (NAs) após as alterações. Os NAs podem ocorrer por diversos
+compreensão. Uma etapa essencial é a verificação da existencia de valores
+ausentes (NAs) nas colunas. Os NAs podem ocorrer por diversos
 motivos, como erros de medição ou falhas na coleta de dados, sendo
 fundamental identificá-los para decidir como tratá-los adequadamente
 durante a análise.
 
-Portanto, após a alteração dos nomes das colunas, é recomendável
-realizar uma verificação minuciosa para garantir a integridade dos dados
-e prepará-los para análises posteriores. Isso contribui para a
-confiabilidade e qualidade dos resultados obtidos a partir do conjunto
-de dados.
-
+Portanto, após esta etápa, é recomendável realizar uma verificação minuciosa 
+para garantir a integridade dos dados e prepará-los para análises posteriores. 
+Isso contribui para a confiabilidade e qualidade dos resultados obtidos a partir 
+do conjunto de dados.
 ```{r}
 # Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
 # Definir as variáveis como numéricas
@@ -301,7 +294,7 @@ ggsave("pairplot_blca.png", pairplot, width = 10, height = 6) # Guarda o pairplo
 ```
 
 
-Normalização dos dados
+## Normalização dos dados
 
 ```{r pressure, echo=FALSE}
 ### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ###
@@ -329,7 +322,7 @@ dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
 #######################codigo todo alterado para o novo dataset até aqui#################
 ```
 
-### Análise de Expressão Diferencial
+## Análise de Expressão Diferencial
 
 Para este passo é necessário pesquisar e Baixar Dados de Expressão
 Genética do TCGA-ACC
@@ -481,30 +474,66 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 ```
 
 ##### Interpretação dos Resultados de Enriquecimento
-e fico por aqui que estou cansado, continuo depois.... ou.... se tiverem a gentileza de fazerem esta parte chata agradeço xD
+.
+.
+.
+.
+.
+.
+.
+.
 
 ```{r}
 # Transformação de dados de contagem
 vsd = varianceStabilizingTransformation(dds, blind = FALSE) 
 
-# 5. Heatmap de distâncias entre amostras
+# Heatmap de distâncias entre amostras
 # Calcular a distância entre as amostras
 sampleDists <- dist(t(assay(vsd)))
 
-# 5.1 Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
+# Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
 #pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
 pheatmap(sampleDists, col = heat.colors(10))
 
 
 ######### Ver este ultimo tópico que não está a correr
-# 5.2 Principal component plot of the samples
+# Principal component plot of the samples
 #plotPCA(vsd, intgroup = c("condition"))
 plotPCA(vsd, intgroup = "condition")
 ```
-
+Realização do Clustering hierárquico
 ```{r}
+# Extrair os valores numéricos dos dados do cBioPortal
+bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
 
+# Escalando os dados
+bladder_scaled <- scale(bladder_numeric)
 
+# Cálculo da matriz de distâncias usando a distância de Manhattan
+dist_bladder <- dist(bladder_scaled, method = "manhattan")
+
+# Clustering hierárquico
+cl_bladder <- hclust(dist_bladder, method = "average")
+
+# Função para plotar o dendrograma com labels
+my.plot.hc <- function(hclust, lab = 1:length(hclust$order), 
+                       lab.col = rep(1, length(hclust$order)), 
+                       hang = 0.1, ...) {
+  y <- rep(hclust$height, 2)
+  x <- as.numeric(hclust$merge)
+  y <- y[which(x < 0)]
+  x <- x[which(x < 0)]
+  x <- abs(x)
+  y <- y[order(x)]
+  x <- x[order(x)]
+  plot(hclust, labels = FALSE, hang = hang, ...)
+  text(x = x, y = y[hclust$order] - (max(hclust$height) * hang), 
+       labels = lab[hclust$order], col = lab.col[hclust$order], 
+       srt = 90, adj = c(1,0.5), xpd = NA, ...)
+}
+
+# Plotagem do dendrograma com os clusters de acordo com a variável "Muscle.loss"
+my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 ```
 
 ### Bibliografia
