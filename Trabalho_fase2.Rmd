@@ -117,7 +117,7 @@ explorados os ensaios do estudo disponiveis e organizados em dataframes:
 ```{r pressure, echo=FALSE}
 ## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
 
-# Define a working directory deste ficheiro para à diretoria atual dela automáticamente
+# Automáticamente define a working directory para o local do ficheiro .Rmd
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Inicialização da API do cBioPortal
@@ -217,7 +217,7 @@ bladder_clin <- bladder_clin %>%
     BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
     OS_MONTHS = as.numeric(OS_MONTHS),
     PFS_MONTHS = as.numeric(PFS_MONTHS),
-    SAMPLE_COUNT = as.numeric(SAMPLE_COUNT)
+    #SAMPLE_COUNT = as.numeric(SAMPLE_COUNT),
   )
 
 # Vamos substituir os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown". Define-se primeiro as colunas numéricas para conseguirmos correr o nosso código de substituição dos NAs.
@@ -248,16 +248,16 @@ bladder_clin <- bladder_clin %>%
     DFS_STATUS = as.factor(DFS_STATUS),
     sampleId = as.factor(sampleId),
     ANALYSIS_COHORT = as.factor(ANALYSIS_COHORT),
-    CANCER_TYPE = as.factor(CANCER_TYPE),
-    CANCER_TYPE_DETAILED = as.factor(CANCER_TYPE_DETAILED),
+    #CANCER_TYPE = as.factor(CANCER_TYPE),
+    #CANCER_TYPE_DETAILED = as.factor(CANCER_TYPE_DETAILED),
     DISTANT_METS = as.factor(DISTANT_METS),
     GRADE = as.factor(GRADE),
     LYMPH_NODE_STATUS = as.factor(LYMPH_NODE_STATUS),
-    ONCOTREE_CODE = as.factor(ONCOTREE_CODE),
+    #ONCOTREE_CODE = as.factor(ONCOTREE_CODE),
     PRIMARY_VS_SECONDARY = as.factor(PRIMARY_VS_SECONDARY),
     PRIOR_INTRAVESICAL_CHEMOTHERAPY = as.factor(PRIOR_INTRAVESICAL_CHEMOTHERAPY),
     SAMPLE_TYPE = as.factor(SAMPLE_TYPE),
-    SOMATIC_STATUS = as.factor(SOMATIC_STATUS),
+    #SOMATIC_STATUS = as.factor(SOMATIC_STATUS),
     TUMOR_STAGE = as.factor(TUMOR_STAGE),
     AJCC_PATHOLOGIC_TUMOR_STAGE = as.factor(AJCC_PATHOLOGIC_TUMOR_STAGE),
     COHORT = as.factor(COHORT),
@@ -280,15 +280,15 @@ summary(bladder_clin)
 ```
 
 
-```{r}
-### Este código é puramente opcional e podemos evitar corrê-lo, ele não tem quaisquer inteferências com os códigos seguintes! ###
+```{r, echo = FALSE, message = FALSE}
+### Aqui vamos observar os estados, distribuições e correlações dos nossos dados, incluindo entender o que podemos fazer para normalização dos dados. ###
 
 # Pairplot para ver os gráficos das correlações possíveis entre colunas
 # Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
 numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
 
 # Criação de um pairplot com só as colunas numéricas para verificar as correlações
-pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+pairplot1 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
                             upper = list(continuous = wrap("cor", size = 2, color = "brown")),
                             lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
   theme(text = element_text(size = 4),
@@ -296,9 +296,9 @@ pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf,
         strip.text = element_text(size = 4),
         panel.spacing = unit(0.1, "lines")) # Ajusta espaços entre os gráficos/painéis
 
-pairplot
+pairplot1
 
-ggsave("pairplot_blca.png", pairplot, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
+ggsave("pairplot1.png", pairplot1, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
 ```
 
 
@@ -307,28 +307,63 @@ ggsave("pairplot_blca.png", pairplot, width = 10, height = 6) # Guarda o pairplo
 ```{r pressure, echo=FALSE}
 ### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ###
 
+# Vamos fazer a normalização dos dados fazendo primeiro a logaritmização dos dados e depois aplicar o Min-Max Scaling para os valores dos nossos dados serem positivos.
+
+# Colunas numéricas que vão ser normalizadas
+cols_norm <- c("RAGNUM_HYPOXIA_SCORE", "WINTER_HYPOXIA_SCORE", "DFS_MONTHS",
+                    "FRACTION_GENOME_ALTERED", "MSI_SCORE_MANTIS",
+                    "MSI_SENSOR_SCORE", "MUTATION_COUNT", "TMB_NONSYNONYMOUS",
+                    "OS_MONTHS", "PFS_MONTHS")
+
+
+# Logaritmização das colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(all_of(cols_norm), ~ if(all(. >= 0)) log(. + 1) else .)) # RStudio presume que os parêntesis estão errados apesar de estarem bem, isto deve-se ao comando "if", substituindo por "if_else" corrige este problema mas com a consequência de dar erros maiores nas transformações, logo mantém-se assim até arranjarmos uma nova solução...
+
 # Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
 bladder_clin <- bladder_clin %>%
   mutate(across(where(is.numeric), min_max_scaling))
 
 # Tratamento de NAs e transformação de dados categóricos
-bladder_clin <- bladder_clin %>%
-  mutate(across(where(is.character), as.factor)) %>%
-  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+# bladder_clin <- bladder_clin %>%
+#   mutate(across(where(is.character), as.factor)) %>%
+#   mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+# 
+# # Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
+# bladder_clin <- bladder_clin %>%
+#   mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .))) %>%
+#   mutate(across(where(is.character), as.factor)) %>%
+#   mutate(across(c(RAGNUM_HYPOXIA_SCORE, WINTER_HYPOXIA_SCORE, DFS_MONTHS, ANEUPLOIDY_SCORE,
+#                   FRACTION_GENOME_ALTERED, MSI_SCORE_MANTIS, MSI_SENSOR_SCORE, MUTATION_COUNT,
+#                   TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS), as.numeric))
 
-# Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
-bladder_clin <- bladder_clin %>%
-  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .))) %>%
-  mutate(across(where(is.character), as.factor)) %>%
-  mutate(across(c(RAGNUM_HYPOXIA_SCORE, WINTER_HYPOXIA_SCORE, DFS_MONTHS, ANEUPLOIDY_SCORE, 
-                  FRACTION_GENOME_ALTERED, MSI_SCORE_MANTIS, MSI_SENSOR_SCORE, MUTATION_COUNT, 
-                  TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS), as.numeric))
-
+# Aplicada a logaritmização e min-max scaling aos dados mRNA
 dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
 
 #######################codigo todo alterado para o novo dataset até aqui#################
 ```
+
+```{r, echo = FALSE, message = FALSE}
+# Vamos voltar a fazer o pairplot depois de termos feito a normalização dos dados...
+# As colunas resultantes neste pairplot foram transformadas!
+# Este código é uma repetição do código anterior do pairplot1, mas estamos a definir como um novo "pairplot2" para fazer a comparação
+numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
+
+pairplot2 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+                            upper = list(continuous = wrap("cor", size = 2, color = "brown")),
+                            lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
+  theme(text = element_text(size = 4),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 4),
+        panel.spacing = unit(0.1, "lines"))
+
+pairplot2
+
+ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
+
+```
+
 
 ## Análise de Expressão Diferencial
 
