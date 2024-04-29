@@ -14,7 +14,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introdução
+# Introdução
 
 Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento
 de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola
@@ -60,7 +60,7 @@ carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com
 carcinoma de bexiga "secundário" (já tratado com quimioterapia ou
 radiação).
 
-### Fase 1: Exploração e Análise de Dados
+## Fase 1: Exploração e Análise de Dados
 
 A primeira fase compreenderá as seguintes etapas: explicação da origem e
 relevância dos dados; realização de tarefas de preparação e
@@ -69,7 +69,7 @@ descritivas e exploração visual por meio de gráficos; realização de
 análises estatísticas univariadas; e por fim, análise de expressão
 diferencial e de enriquecimento.
 
-#### Instalação e importação de packages
+## Instalação e importação de packages
 
 Nesta secção, são destacados todos os pacotes utilizados no trabalho,
 que facilitam a aquisição e análise de dados ao longo do documento,
@@ -99,6 +99,7 @@ library(cBioPortalData)
 library(edgeR)
 library(limma)
 library(DESeq2)
+library(ggplot2)
 library(GGally)
 library(dplyr)
 library(tibble)
@@ -109,7 +110,7 @@ library(EnhancedVolcano)
 
 ```
 
-# Exploração dos dados presentes no dataset
+## Exploração dos dados presentes no dataset
 
 Nesta fase é realizado o carregamento dos dados clinicos do estudo,
 explorados os ensaios do estudo disponiveis e organizados em dataframes:
@@ -138,7 +139,7 @@ names(colData(bladder)) # tipos de metadados associados a cada amostra
 summary(bladder)
 ```
 
-# Extração dos Metadados
+## Extração dos Metadados
 
 A extração dos metadados é um processo vital na organização e
 compreensão de conjuntos de dados. Os metadados fornecem informações
@@ -364,8 +365,7 @@ ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
 
 ```
 
-
-## Análise de Expressão Diferencial
+# Análise de Expressão Diferencial
 
 Para este passo é necessário pesquisar e Baixar Dados de Expressão
 Genética do TCGA-ACC
@@ -414,7 +414,7 @@ summary(res)
 
 ```
 
-#### Interpretação dos Resultados
+## Interpretação dos Resultados
 
 Total de Genes Analisados: 52,766 genes com contagem total de leituras
 não zero.
@@ -453,7 +453,7 @@ pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", c
 
 ```
 
-### Análise de Enriquecimento
+# Análise de Enriquecimento
 Análise de Enriquecimento Funcional
 para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
 
@@ -504,7 +504,7 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 
 ```
 
-#### Resultados de Enriquecimento
+## Resultados de Enriquecimento
 
 ```{r}
 # Visualizar os resultados de enriquecimento se houver dados significativos
@@ -516,7 +516,7 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 }
 ```
 
-##### Interpretação dos Resultados de Enriquecimento
+### Interpretação dos Resultados de Enriquecimento
 .
 .
 .
@@ -537,13 +537,92 @@ sampleDists <- dist(t(assay(vsd)))
 # Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
 #pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
 pheatmap(sampleDists, col = heat.colors(10))
-
-
-######### Ver este ultimo tópico que não está a correr
-Principal component plot of the samples
-#plotPCA(vsd, intgroup = c("condition"))
-plotPCA(vsd, intgroup = "condition")
 ```
+
+
+# PCA - Principal Component Analysis
+Há várias considerações importantes a serem feitas para determinar se o PCA é útil ou não neste caso. Os dados incluem uma variedade de variáveis demográficas e clínicas comuns nas investigações médicas e biológicas. 
+Aqui, o PCA pode ser útil para visualizar e entender como essas variáveis separadas podem estar relacionadas ou conectadas. Este é mais eficaz quando se trata de variáveis contínuas, porque a redução de dimensionalidade pode ajudar a mostrar padrões ocultos.
+O foco principal parece estar na variabilidade genética e na resposta ao tratamento. Assim, torna-se mais relevante análises de expressão genetica e diferenças moleculares relacionadas com os tratamentos ou subtipos de cancro. 
+Tentamos incluir PCAs de dados de expressão genetica para identificar diferenças entre tumores primários e secundários ou para identificar subgrupos de pacientes usando perfis de expressão.
+
+### Isto que se segue não é para ficar no trabalho final, só um tutorial/orientações para os passos seguintes nesta parte:
+
+Após um PCA de sucesso é preciso:
+
+  Validar a Variância Explicada:
+  # Realizar PCA e verificar a variância explicada
+pca_result <- prcomp(assay(vsd), scale. = TRUE)
+summary(pca_result)  # Mostra a importância dos componentes, incluindo a variância explicada
+  # Extrair e plotar a variância explicada para visualização
+var_exp <- pca_result$sdev^2 / sum(pca_result$sdev^2)  # proporção da variância explicada
+plot(var_exp, xlab = "Componentes Principais", ylab = "Variância Explicada", type = 'b',
+     main = "Gráfico de Scree dos Componentes Principais")
+     
+  Integração com Outras Análises:
+  # Assumindo que o PCA já foi realizado e os resultados estão em `pca_result`
+  # Usar os dois primeiros componentes principais para um plot de cluster
+plot(pca_result$x[,1:2], col = colData(vsd)$some_grouping_factor, pch = 19,
+     xlab = "PC1", ylab = "PC2", main = "PCA Plot com Coloração por Grupo")
+legend("topright", legend = levels(factor(colData(vsd)$some_grouping_factor)), col = 1:nlevels(factor(colData(vsd)$some_grouping_factor)), pch = 19)
+  # Após identificar grupos interessantes, realizar análise de expressão diferencial
+  # entre grupos selecionados ou análise de enriquecimento funcional
+  
+  Visualização Melhorada: Plotar as Cargas dos Componentes Principais (Loadings):
+  # Plotar as cargas dos componentes principais
+loadings <- pca_result$rotation  # Obtém as cargas
+biplot(pca_result, cex = 0.5)  # Biplot que mostra tanto scores quanto cargas
+  # Alternativamente, plotar apenas as maiores cargas para os primeiros dois PCs
+top_loadings <- head(order(abs(loadings[,1]), decreasing = TRUE), 10)
+barplot(loadings[top_loadings, 1], names.arg = rownames(loadings)[top_loadings],
+        main = "Top 10 Cargas para PC1", las = 2)
+
+
+```{r}
+######### Acho que ficou resolvido o erro falta analisar e escrever sobre eles, ou sobre os que queremos que fiquem no trabalho e aprofundar/fazer esses! Vejam a descrição acima para tirarem ideias.
+
+########## Principal component plot of the samples ##########
+# Eram tantos PCAs que decidi criar uma função para a maioria deles, no fim está o treatment_type que precisou de um pequeno pré-processamento dos dados, se for preciso consigo reverter facilmente para plotar grafico a grafico.
+
+# Para gerar mais PCAs one-by-one:
+#plotPCA(vsd, intgroup = c("escolher a coluna certa, as colunas que estão sub-divididas precisam do tratamento certo para serem visualizadas no PCA"))
+
+# Função para realizar e plotar PCAs
+run_and_plot_PCA <- function(vsd, variable, title) {
+  # Verificar se a variável existe em colData(vsd)
+  if (variable %in% colnames(colData(vsd))) {
+    # Executar PCA usando a variável correta para agrupamento
+    pca_result <- plotPCA(vsd, intgroup = variable, ntop = 500, returnData = TRUE) #usei as 500 top features que são o standard mas podemos mudar mediante a variavel
+    # Checar se o pca_result é um dataframe antes de tentar plotar
+    if (is.data.frame(pca_result)) {
+      # Usar ggplot para criar o gráfico PCA
+      ggplot(pca_result, aes(x = PC1, y = PC2, color = !!rlang::sym(variable))) +
+        geom_point() +
+        ggtitle(title) +
+        theme_minimal()
+    } else {
+      print("O resultado de plotPCA não é um dataframe.")
+    }
+  } else {
+    print(paste("A coluna", variable, "não está disponível em colData(vsd)."))
+  }
+}
+
+# Executar PCA para diferentes variáveis demográficas e clínicas
+run_and_plot_PCA(vsd, "gender", "PCA para a variável Gênero") #nao sei se retire
+run_and_plot_PCA(vsd, "race", "PCA para a variável Raça") #nao sei se retire
+run_and_plot_PCA(vsd, "ethnicity", "PCA para a variável Etnia") #nao sei se retire
+run_and_plot_PCA(vsd, "vital_status", "PCA para a variável Estado Vital")
+run_and_plot_PCA(vsd, "age_at_index", "PCA para a variável Idade no diagnóstico")
+run_and_plot_PCA(vsd, "ajcc_pathologic_stage", "PCA para a variável Estágio da Doença")
+
+# Código para tratamento tipo de dados
+colData(dds)$simple_treatment_type <- sapply(colData(dds)$treatments, function(x) x$treatment_type[1])
+colData(vsd) <- colData(dds)
+run_and_plot_PCA(vsd, "simple_treatment_type", "PCA por Tipo de Tratamento")
+```
+
+
 Realização do Clustering hierárquico
 ```{r}
 # Extrair os valores numéricos dos dados do cBioPortal
@@ -579,7 +658,7 @@ my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
 my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 ```
 
-### Bibliografia
+# Bibliografia
 
 Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current
 Challenges and Future Directions. Medicina (Kaunas, Lithuania), 57(8).
