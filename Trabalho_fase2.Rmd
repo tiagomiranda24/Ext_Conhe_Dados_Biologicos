@@ -106,6 +106,7 @@ library(tibble)
 library(TCGAbiolinks)
 library(clusterProfiler)
 library(org.Hs.eg.db)
+library(pheatmap)
 library(EnhancedVolcano)
 
 ```
@@ -578,14 +579,44 @@ barplot(loadings[top_loadings, 1], names.arg = rownames(loadings)[top_loadings],
         main = "Top 10 Cargas para PC1", las = 2)
 
 
+
+
+
 ```{r}
 ######### Acho que ficou resolvido o erro falta analisar e escrever sobre eles, ou sobre os que queremos que fiquem no trabalho e aprofundar/fazer esses! Vejam a descrição acima para tirarem ideias.
 
 ########## Principal component plot of the samples ##########
+
+# Calcula o PCA com base nos dados de expressão ou outro conjunto relevante
+pca_result <- prcomp(assay(vsd), scale. = TRUE)
+exp_var <- summary(pca_result)$importance["Proportion of Variance",]
+
+# Plota a "variância explicada" para visualizar a contribuição de cada componente
+plot(exp_var, type = 'b', main = "Variância Explicada por Cada Componente Principal", xlab = "Componente Principal", ylab = "Variância Explicada")
+
+# Identifica agrupamentos baseados nos dois primeiros componentes principais
+clustering_results <- kmeans(pca_result$x[, 1:2], centers = 3)
+
+# Visualiza os agrupamentos
+plot(pca_result$x[, 1:2], col = clustering_results$cluster, pch = 19, xlab = "PC1", ylab = "PC2")
+legend("topright", legend = paste("Cluster", 1:3), fill = 1:3)
+
+# Obtem as cargas dos componentes principais
+loadings <- pca_result$rotation
+
+# Visualiza as cargas para os dois primeiros componentes principais
+plot(loadings[, 1], loadings[, 2], type = 'n', xlab = "PC1 Loadings", ylab = "PC2 Loadings", main = "PCA Loadings Plot")
+text(loadings[, 1], loadings[, 2], labels = rownames(loadings), cex = 0.7)
+
+```
+
+```{r}
 # Eram tantos PCAs que decidi criar uma função para a maioria deles, no fim está o treatment_type que precisou de um pequeno pré-processamento dos dados, se for preciso consigo reverter facilmente para plotar grafico a grafico.
 
 # Para gerar mais PCAs one-by-one:
 #plotPCA(vsd, intgroup = c("escolher a coluna certa, as colunas que estão sub-divididas precisam do tratamento certo para serem visualizadas no PCA"))
+
+# Com base em alguns PCAs anteriores estes foi os que gerei:
 
 # Função para realizar e plotar PCAs
 run_and_plot_PCA <- function(vsd, variable, title) {
@@ -621,7 +652,6 @@ colData(dds)$simple_treatment_type <- sapply(colData(dds)$treatments, function(x
 colData(vsd) <- colData(dds)
 run_and_plot_PCA(vsd, "simple_treatment_type", "PCA por Tipo de Tratamento")
 ```
-
 
 Realização do Clustering hierárquico
 ```{r}
