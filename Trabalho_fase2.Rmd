@@ -569,11 +569,27 @@ testData <- bladder_clin[ind == 2, ]
 
 # Modelagem e avaliação com k-NN
 tryCatch({
+  # Verifica se há valores NA nos dados
+  if(anyNA(trainData) || anyNA(testData)) {
+    stop("Dados contêm valores NA. Por favor, trate os valores ausentes antes de prosseguir.")
+  }
+  
+  # Modelagem com k-NN
   knn_pred <- knn(trainData[, 1:4], testData[, 1:4], trainData$DFS_STATUS)
   t_knn <- table(knn_pred, testData$DFS_STATUS)
   pecc_knn <- pecc(knn_pred, testData$DFS_STATUS)
   sensib_knn <- t_knn[2, 2] / sum(testData$DFS_STATUS == "DiseaseFree")  # Sensibilidade
   especif_knn <- t_knn[1, 1] / sum(testData$DFS_STATUS == "Disease")  # Especificidade
+  
+  # Apresentação dos resultados
+  results <- data.frame(
+    Model = "k-NN",
+    PECC = pecc_knn,
+    Sensibilidade = sensib_knn,
+    Especificidade = especif_knn
+  )
+  print(results)
+  
 }, error = function(e) {
   cat("Erro durante a modelagem e avaliação com k-NN:", conditionMessage(e), "\n")
 })
@@ -636,13 +652,13 @@ plot(tree2)
 text(tree2)
 
 # Árvore de Regressão com o pacote 'rpart'
-arvreg <- rpart(TUMOR_STAGE ~ ., data = cpuTr)
+arvreg <- rpart(TUMOR_STAGE ~ syct + mmin + mmax + chmax + chmin, data = TUMOR_STAGE_Tr)
 plot(arvreg)
 text(arvreg)
-val_prev <- predict(arvreg, newdata = cpuTs)
+val_prev <- predict(arvreg, newdata = TUMOR_STAGE_Ts)
 val_prev
-rmse(val_prev, cpuTs$perf)
-mad(val_prev, cpuTs$perf)
+rmse(val_prev, TUMOR_STAGE_Ts$TUMOR_STAGE)
+mad(val_prev, TUMOR_STAGE_Ts$TUMOR_STAGE)
 ```
 
 ### Bibliografia
