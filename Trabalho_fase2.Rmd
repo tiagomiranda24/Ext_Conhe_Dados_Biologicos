@@ -117,7 +117,7 @@ explorados os ensaios do estudo disponiveis e organizados em dataframes:
 ```{r pressure, echo=FALSE}
 ## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
 
-# Automáticamente define a working directory para o local do ficheiro .Rmd
+# Define a working directory deste ficheiro para à diretoria atual dela automáticamente
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Inicialização da API do cBioPortal
@@ -216,8 +216,7 @@ bladder_clin <- bladder_clin %>%
     AGE = as.numeric(AGE),
     BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
     OS_MONTHS = as.numeric(OS_MONTHS),
-    PFS_MONTHS = as.numeric(PFS_MONTHS),
-    #SAMPLE_COUNT = as.numeric(SAMPLE_COUNT),
+    PFS_MONTHS = as.numeric(PFS_MONTHS)
   )
 
 # Vamos substituir os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown". Define-se primeiro as colunas numéricas para conseguirmos correr o nosso código de substituição dos NAs.
@@ -248,16 +247,12 @@ bladder_clin <- bladder_clin %>%
     DFS_STATUS = as.factor(DFS_STATUS),
     sampleId = as.factor(sampleId),
     ANALYSIS_COHORT = as.factor(ANALYSIS_COHORT),
-    #CANCER_TYPE = as.factor(CANCER_TYPE),
-    #CANCER_TYPE_DETAILED = as.factor(CANCER_TYPE_DETAILED),
     DISTANT_METS = as.factor(DISTANT_METS),
     GRADE = as.factor(GRADE),
     LYMPH_NODE_STATUS = as.factor(LYMPH_NODE_STATUS),
-    #ONCOTREE_CODE = as.factor(ONCOTREE_CODE),
     PRIMARY_VS_SECONDARY = as.factor(PRIMARY_VS_SECONDARY),
     PRIOR_INTRAVESICAL_CHEMOTHERAPY = as.factor(PRIOR_INTRAVESICAL_CHEMOTHERAPY),
     SAMPLE_TYPE = as.factor(SAMPLE_TYPE),
-    #SOMATIC_STATUS = as.factor(SOMATIC_STATUS),
     TUMOR_STAGE = as.factor(TUMOR_STAGE),
     AJCC_PATHOLOGIC_TUMOR_STAGE = as.factor(AJCC_PATHOLOGIC_TUMOR_STAGE),
     COHORT = as.factor(COHORT),
@@ -269,9 +264,6 @@ bladder_clin <- bladder_clin %>%
     RACE = as.factor(RACE)
   )
 
-# Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
-bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
-
 # Verificar se ainda há valores NA
 summary(bladder_clin)
 
@@ -281,14 +273,14 @@ summary(bladder_clin)
 
 
 ```{r}
-### Aqui vamos observar os estados, distribuições e correlações dos nossos dados, incluindo entender o que podemos fazer para normalização dos dados. ###
+### Este código é puramente opcional e podemos evitar corrê-lo, ele não tem quaisquer inteferências com os códigos seguintes! ###
 
-# Pairplot PRE-NOMALIZAÇÃO para ver os gráficos das correlações possíveis entre colunas
+# Pairplot para ver os gráficos das correlações possíveis entre colunas
 # Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
 numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
 
 # Criação de um pairplot com só as colunas numéricas para verificar as correlações
-pairplot1 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+pairplot <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
                             upper = list(continuous = wrap("cor", size = 2, color = "brown")),
                             lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
   theme(text = element_text(size = 4),
@@ -296,59 +288,36 @@ pairplot1 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf,
         strip.text = element_text(size = 4),
         panel.spacing = unit(0.1, "lines")) # Ajusta espaços entre os gráficos/painéis
 
-pairplot1 # Pairplot PRE-NORMALIZAÇÃO
+pairplot
 
-ggsave("pairplot1.png", pairplot1, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
+ggsave("pairplot_blca.png", pairplot, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
 ```
 
 
 ## Normalização dos dados
 
 ```{r pressure, echo=FALSE}
-### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ###
-
-# Vamos fazer a normalização dos dados fazendo primeiro a logaritmização dos dados e depois aplicar o Min-Max Scaling para os valores dos nossos dados serem positivos.
-
-# Colunas numéricas que vão ser normalizadas
-cols_norm <- c("RAGNUM_HYPOXIA_SCORE", "WINTER_HYPOXIA_SCORE", "DFS_MONTHS",
-                    "FRACTION_GENOME_ALTERED", "MSI_SCORE_MANTIS",
-                    "MSI_SENSOR_SCORE", "MUTATION_COUNT", "TMB_NONSYNONYMOUS",
-                    "OS_MONTHS", "PFS_MONTHS")
-
-
-# Logaritmização das colunas numéricas
-bladder_clin <- bladder_clin %>%
-  mutate(across(all_of(cols_norm), ~ if(all(. >= 0)) log(. + 1) else .)) # RStudio presume que os parêntesis estão errados apesar de estarem bem, isto deve-se ao comando "if", substituindo por "if_else" corrige este problema mas com a consequência de dar erros maiores nas transformações, logo mantém-se assim até arranjarmos uma nova solução...
+### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre!
 
 # Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
 bladder_clin <- bladder_clin %>%
   mutate(across(where(is.numeric), min_max_scaling))
 
-# Aplicada a logaritmização e min-max scaling aos dados mRNA
+# Tratamento de NAs e transformação de dados categóricos
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.character), as.factor)) %>%
+  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+# Aplicação do Min-Max Scaling exclusivamente às colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .))) %>%
+  mutate(across(where(is.character), as.factor)) %>%
+  mutate(across(c(RAGNUM_HYPOXIA_SCORE, WINTER_HYPOXIA_SCORE, DFS_MONTHS, ANEUPLOIDY_SCORE, 
+                  FRACTION_GENOME_ALTERED, MSI_SCORE_MANTIS, MSI_SENSOR_SCORE, MUTATION_COUNT, 
+                  TMB_NONSYNONYMOUS, AGE, BUFFA_HYPOXIA_SCORE, OS_MONTHS, PFS_MONTHS), as.numeric))
+
 dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
-```
-
-## Visualização da Normalização dos dados
-```{r}
-# Vamos voltar a fazer o pairplot depois de termos feito a normalização dos dados...
-# As colunas resultantes neste pairplot foram transformadas!
-
-# Pairplot PÓS-NOMARLIZAÇÃO (repetição do código anterior do pairplot1, mas definido como "pairplot2" para fazer comparações)
-numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
-
-pairplot2 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
-                            upper = list(continuous = wrap("cor", size = 2, color = "brown")),
-                            lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
-  theme(text = element_text(size = 4),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        strip.text = element_text(size = 4),
-        panel.spacing = unit(0.1, "lines"))
-
-pairplot2 # Pairplot PÓS-NORMALIZAÇÃO
-
-ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
-
 ```
 
 ## Análise de Expressão Diferencial
@@ -357,14 +326,8 @@ Para este passo é necessário pesquisar e Baixar Dados de Expressão
 Genética do TCGA-ACC
 
 ```{r}
-# # Ver que projetos estão disponíveis
-# gdcprojects <- getGDCprojects()
-
 # Define o projeto
 project <- "TCGA-ACC"
-
-# Sumário dos ficheiros presentes no projeto
-getProjectSummary(project)
 
 # Configura a consulta com o tipo de amostra correto
 query <- GDCquery(project = project,
@@ -373,16 +336,11 @@ query <- GDCquery(project = project,
                   workflow.type = "STAR - Counts",
                   sample.type = "Primary Tumor")
 
-# # Ver que ficheiros temos no projeto
-# output_query <- getResults(query)
-
 # Baixa os dados
 GDCdownload(query)
 
 # Prepara os dados para análise
 data <- GDCprepare(query)
-
-## Mencionando aqui caso haja problemas com o GDCdownload() e o GDCprepare(), se está a utilizar Windows, certifique-se que o 'working directory' deste trabalho encontra-se numa diretoria de tamanho INFERIOR A 60 CARACTERES! Isto porque o GDCdownload vai criar as pastas onde os ficheiros .tsv vão ficar, se a 'working directory' tiver mais de 60 caracteres, a diretoria resultante de CADA UM DESTES FICHEIROS vai ter mais de 260 caracteres de comprimento, excedendo o limite path/filename do Windows!!! See: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/153#issuecomment-1380580924
 ```
 
 O próximo comando lista tanto dos dados clínicos colData(data) quanto
@@ -493,11 +451,10 @@ enrich_res_up <- enrichGO(gene         = gene_list_up_entrez$ENTREZID,
 
 # Verificar os resultados da análise de enriquecimento
 if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
-  print(summary(enrich_res_up))
+  print(as.data.frame(summary(enrich_res_up)))
 } else {
   print("No significant enrichment found.")
 }
-
 ```
 
 #### Resultados de Enriquecimento
@@ -513,14 +470,10 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 ```
 
 ##### Interpretação dos Resultados de Enriquecimento
-.
-.
-.
-.
-.
-.
-.
-.
+
+A análise do gráfico indica que os termos de enriquecimento mais relevantes estão ligados à resposta imune e à sinalização celular, sugerindo que esses processos desempenham um papel crucial no desenvolvimento do cancro urotelial. ´
+Destacam-se termos como regulação da via de sinalização da resposta imune, quimiotaxia e migração mediada por quimiocinas de leucócitos, indicando a importância da ativação do sistema imune e da migração celular na progressão do cancro. 
+Esses resultados fornecem insights valiosos sobre os processos biológicos subjacentes à doença, podendo auxiliar na identificação de novos alvos terapêuticos e no desenvolvimento de estratégias de tratamento mais eficazes.
 
 ```{r}
 # Transformação de dados de contagem
