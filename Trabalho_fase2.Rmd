@@ -87,14 +87,20 @@ análises de forma adequada e precisa.
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db","org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano"), ask = FALSE)
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano"), ask = FALSE)
 
 if (!requireNamespace("GGally", quietly = TRUE))
   install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
+
+if (!requireNamespace("rentrez", quietly = TRUE))
+  install.packages("rentrez")
+
 ```
 
 ```{r, include=FALSE}
+
 # Carregamento dos pacotes
+
 library(cBioPortalData)
 library(edgeR)
 library(limma)
@@ -106,6 +112,8 @@ library(TCGAbiolinks)
 library(clusterProfiler)
 library(org.Hs.eg.db)
 library(EnhancedVolcano)
+library(pheatmap)
+library(rentrez)
 
 ```
 
@@ -117,7 +125,7 @@ explorados os ensaios do estudo disponiveis e organizados em dataframes:
 ```{r pressure, echo=FALSE}
 ## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
 
-# Automáticamente define a working directory para o local do ficheiro .Rmd
+# Automáticamente define a working directory para o local deste ficheiro .Rmd
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Inicialização da API do cBioPortal
@@ -144,6 +152,7 @@ A extração dos metadados é um processo vital na organização e
 compreensão de conjuntos de dados. Os metadados fornecem informações
 essenciais sobre os dados, incluindo sua origem, estrutura, formato e
 significado.
+
 ```{r}
 # Informações (Descrição, citação e PubMed ID do artigo) presentes no ficheiro "meta_study.txt"
 meta_study <- read.delim("blca_msk_tcga_2020\\meta_study.txt", sep = ":", 
@@ -157,8 +166,21 @@ meta_study$data <- trimws(meta_study$data) # Remove leading spaces na coluna "da
 meta_study["description", "data"] # Descrição
 meta_study["citation", "data"]    # Citação
 meta_study["pmid", "data"]        # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
-```
 
+# Função para obter o número DOI do artigo a partir do PubMed ID
+get_doi_blca <- function(pubmed_id) {
+  record <- entrez_fetch(db = "pubmed", id = pubmed_id, rettype = "abstract")
+  doi_blca <- sub(".*doi: (10\\.\\d+/[^ \\n\\\"]*).*", "doi: \\1", record)
+  doi_blca <- gsub("\\.$", "", doi_blca)
+  return(doi_blca)
+}
+
+# Obter o número DOI
+pubmed_id <- meta_study["pmid", "data"]
+doi_blca <- get_doi_blca(pubmed_id)
+print(doi_blca)
+
+```
 
 ```{r}
 # Consulta dos dados de mrna e conversão em dataframe.
@@ -171,7 +193,7 @@ min_max_scaling <- function(x) {
   return((x - min_val) / (max_val - min_val))
 }
 
-#sem o min e max scaling nesta parte ocorre erro no mutate que se segue:
+# sem o min e max scaling nesta parte ocorre erro no mutate que se segue:
 
 dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
@@ -191,12 +213,10 @@ Portanto, após esta etápa, é recomendável realizar uma verificação minucio
 para garantir a integridade dos dados e prepará-los para análises posteriores. 
 Isso contribui para a confiabilidade e qualidade dos resultados obtidos a partir 
 do conjunto de dados.
-```{r}
-# Para verificar as classes das colunas do conjunto de dados:
-unlist(lapply(bladder_clin, class))
 
-# Para verificar os tipos das colunas do conjunto de dados:
-unlist(lapply(bladder_clin, typeof))
+```{r}
+unlist(lapply(bladder_clin, class))  # Verifica as classes das colunas do conjunto de dados
+unlist(lapply(bladder_clin, typeof)) # Verifica os tipos das colunas do conjunto de dados
 ```
 
 ```{r}
@@ -318,7 +338,7 @@ cols_norm <- c("RAGNUM_HYPOXIA_SCORE", "WINTER_HYPOXIA_SCORE", "DFS_MONTHS",
 
 # Logaritmização das colunas numéricas
 bladder_clin <- bladder_clin %>%
-  mutate(across(all_of(cols_norm), ~ if(all(. >= 0)) log(. + 1) else .)) # RStudio presume que os parêntesis estão errados apesar de estarem bem, isto deve-se ao comando "if", substituindo por "if_else" corrige este problema mas com a consequência de dar erros maiores nas transformações, logo mantém-se assim até arranjarmos uma nova solução...
+  mutate(across(all_of(cols_norm), ~ if(all(. >= 0)) log(. + 1) else .)) # RStudio presume que os parêntesis estão errados apesar de estarem bem, isto deve-se ao comando "if". Se metermos "if_else", o "erro" desaparece mas consequentemente obtêm-se erros nas transformações, logo mantém-se assim até arranjarmos uma nova solução...
 
 # Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
 bladder_clin <- bladder_clin %>%
@@ -329,12 +349,14 @@ dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
   mutate(across(where(is.numeric), min_max_scaling))
 ```
 
-## Visualização da Normalização dos dados
+
+## Visualização geral da Normalização dos dados
+
 ```{r}
 # Vamos voltar a fazer o pairplot depois de termos feito a normalização dos dados...
 # As colunas resultantes neste pairplot foram transformadas!
 
-# Pairplot PÓS-NOMARLIZAÇÃO (repetição do código anterior do pairplot1, mas definido como "pairplot2" para fazer comparações)
+# Pairplot PÓS-NOMARLIZAÇÃO (repetição do código do pairplot1, mas definido como "pairplot2" para fazermos comparações)
 numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
 
 pairplot2 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
@@ -349,6 +371,60 @@ pairplot2 # Pairplot PÓS-NORMALIZAÇÃO
 
 ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
 
+```
+# Pie Charts (Gráficos de Pizza)
+
+```{r}
+### Pie Charts
+## Código para fazer o plot pie chart de CADA UMA das colunas categóricas
+
+# Definição dos títulos de cada piechart
+plot_titles <- c(
+  "Overall Survival Status",                # OS_STATUS
+  "Sex",                                    # SEX
+  "Ethnicity Category",                     # ETHNICITY
+  "Race Category",                          # RACE
+  "AJCC Metastasis Stage Code",             # PATH_M_STAGE
+  "AJCC Neoplasm Disease Lymph Node Stage", # PATH_N_STAGE
+  "AJCC Neoplasm Disease Stage",            # AJCC_PATHOLOGIC_TUMOR_STAGE
+  "AJCC Tumor Stage",                       # PATH_T_STAGE
+  "Analysis Cohort"                         # ANALYSIS_COHORT
+)
+
+# Definição das frequências e das frequências relativas
+freq_list <- list(
+  OS_STATUS = prop.table(table(bladder_clin$OS_STATUS)),
+  SEX = prop.table(table(bladder_clin$SEX)),
+  ETHNICITY = prop.table(table(bladder_clin$ETHNICITY)),
+  RACE = prop.table(table(bladder_clin$RACE)),
+  PATH_M_STAGE = prop.table(table(bladder_clin$PATH_M_STAGE)), 
+  PATH_N_STAGE = prop.table(table(bladder_clin$PATH_N_STAGE)), 
+  AJCC_PATHOLOGIC_TUMOR_STAGE = prop.table(table(bladder_clin$AJCC_PATHOLOGIC_TUMOR_STAGE)), 
+  PATH_T_STAGE = prop.table(table(bladder_clin$PATH_T_STAGE)), 
+  ANALYSIS_COHORT = prop.table(table(bladder_clin$ANALYSIS_COHORT))
+)
+
+# Criação de um dataframe com as frequências e os nomes das colunas
+pie_data <- lapply(freq_list, function(freq_rel) {
+  data.frame(labels = names(freq_rel), values = as.numeric(freq_rel))
+})
+
+# Criação dos pie charts
+for (i in seq_along(plot_titles)) {
+  plot <- ggplot(pie_data[[i]], aes(x = "", y = values, fill = labels)) +
+    geom_bar(stat = "identity", width = 1) +
+    geom_text(aes(label = paste(round(freq_list[[i]] * 100, 2), "%")), position = position_stack(vjust = 0.5)) +
+    coord_polar("y", start = 0) + 
+    labs(title = plot_titles[i], fill = "") +
+    theme_void() +
+    theme(
+      legend.position = "left",
+      plot.title = element_text(hjust = 0.5), 
+      plot.margin = margin(1)
+    )
+  
+  print(plot)
+}
 ```
 
 ## Análise de Expressão Diferencial
@@ -382,7 +458,7 @@ GDCdownload(query)
 # Prepara os dados para análise
 data <- GDCprepare(query)
 
-## Mencionando aqui caso haja problemas com o GDCdownload() e o GDCprepare(), se está a utilizar Windows, certifique-se que o 'working directory' deste trabalho encontra-se numa diretoria de tamanho INFERIOR A 60 CARACTERES! Isto porque o GDCdownload vai criar as pastas onde os ficheiros .tsv vão ficar, se a 'working directory' tiver mais de 60 caracteres, a diretoria resultante de CADA UM DESTES FICHEIROS vai ter mais de 260 caracteres de comprimento, excedendo o limite path/filename do Windows!!! See: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/153#issuecomment-1380580924
+## Mencionando aqui caso haja problemas com o GDCdownload() e o GDCprepare(), se está a utilizar Windows, certifique-se que o 'working directory' deste trabalho encontra-se numa diretoria de tamanho INFERIOR A 60 CARACTERES! Isto porque o GDCdownload vai criar as pastas onde os ficheiros .tsv vão ficar, se a 'working directory' tiver mais de 60 caracteres, a diretoria resultante de CADA UM DESTES FICHEIROS vai ter mais de 260 caracteres de comprimento, excedendo o limite path/filename do Windows!!! Fonte: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/153#issuecomment-1380580924
 ```
 
 O próximo comando lista tanto dos dados clínicos colData(data) quanto
@@ -428,9 +504,9 @@ impactando a precisão das estimativas de dispersão e consequentemente
 dos testes.
 
 ```{r}
-#Visualização dos Resultados:
-#Volcano Plot
-#library(EnhancedVolcano) # Pacote está a ser aberto no chunk "Carregamento dos Pacotes"
+# Visualização dos Resultados:
+#library(EnhancedVolcano)
+# Volcano Plot
 EnhancedVolcano(res,
                 lab = rownames(res),
                 x = 'log2FoldChange',
@@ -440,9 +516,11 @@ EnhancedVolcano(res,
                 FCcutoff = 0.5)
 
 ```
+
 ```{r}
-#Heatmaps:
-library(pheatmap)
+# Heatmaps:
+#library(pheatmap)
+
 topVarGenes <- head(order(rowVars(assay(dds)), decreasing = TRUE), 100)
 mat <- assay(dds)[topVarGenes, ]
 pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean")
@@ -450,6 +528,7 @@ pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", c
 ```
 
 ### Análise de Enriquecimento
+
 Análise de Enriquecimento Funcional
 para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
 
@@ -493,11 +572,10 @@ enrich_res_up <- enrichGO(gene         = gene_list_up_entrez$ENTREZID,
 
 # Verificar os resultados da análise de enriquecimento
 if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
-  print(summary(enrich_res_up))
+  print(as.data.frame(summary(enrich_res_up)))
 } else {
   print("No significant enrichment found.")
 }
-
 ```
 
 #### Resultados de Enriquecimento
@@ -513,14 +591,10 @@ if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
 ```
 
 ##### Interpretação dos Resultados de Enriquecimento
-.
-.
-.
-.
-.
-.
-.
-.
+
+A análise do gráfico indica que os termos de enriquecimento mais relevantes estão ligados à resposta imune e à sinalização celular, sugerindo que esses processos desempenham um papel crucial no desenvolvimento do cancro urotelial. ´
+Destacam-se termos como regulação da via de sinalização da resposta imune, quimiotaxia e migração mediada por quimiocinas de leucócitos, indicando a importância da ativação do sistema imune e da migração celular na progressão do cancro. 
+Esses resultados fornecem insights valiosos sobre os processos biológicos subjacentes à doença, podendo auxiliar na identificação de novos alvos terapêuticos e no desenvolvimento de estratégias de tratamento mais eficazes.
 
 ```{r}
 # Transformação de dados de contagem
@@ -536,11 +610,13 @@ pheatmap(sampleDists, col = heat.colors(10))
 
 
 ######### Ver este ultimo tópico que não está a correr
-Principal component plot of the samples
+# Principal component plot of the samples
 #plotPCA(vsd, intgroup = c("condition"))
 plotPCA(vsd, intgroup = "condition")
 ```
-Realização do Clustering hierárquico
+
+# Realização do Clustering hierárquico
+
 ```{r}
 # Extrair os valores numéricos dos dados do cBioPortal
 bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
@@ -574,6 +650,7 @@ my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
 # Plotagem do dendrograma com os clusters de acordo com a variável "Muscle.loss"
 my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 ```
+
 ## Machine Learning
 
 - Carregamento de bibliotecas: As bibliotecas necessárias, como 'MASS', 'class', 'e1071' e 'party', são carregadas para acesso às funções e métodos necessários.
@@ -583,6 +660,7 @@ my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 - Divisão de Conjuntos de Treino/Teste: Os dados são divididos em conjuntos de treino e teste usando uma proporção de 70/30. Isso é feito para permitir a avaliação do desempenho dos modelos em dados não vistos.
 
 - Modelagem e Avaliação com k-NN: Um modelo de k-vizinhos mais próximos (k-NN) é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC, sensibilidade e especificidade.
+
 ```{r}
 # Carregando as bibliotecas necessárias
 library(MASS)
@@ -628,11 +706,13 @@ tryCatch({
   cat("Erro durante a modelagem e avaliação com k-NN:", conditionMessage(e), "\n")
 })
 ```
+
 - Modelagem e Avaliação com Naive Bayes: Um modelo de Naive Bayes é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC.
 
 - Modelagem e Avaliação com Árvores de Decisão: Uma árvore de decisão é construída com os dados de treino e usada para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC.
 
 - Apresentação dos Resultados: Os resultados das avaliações são organizados em um dataframe e impressos na tela.
+
 ```{r}
 # Modelagem e avaliação com Naive Bayes
 model_nb <- naiveBayes(DFS_STATUS ~ ., data = trainData)  # Modelagem do Naive Bayes
@@ -655,6 +735,7 @@ results <- data.frame(
 )
 print(results)
 ```
+
 - Árvore de Decisão com Formulação Explícita: Uma árvore de decisão é construída explicitamente usando a fórmula especificada e os dados de treino. A árvore é plotada e suas previsões são avaliadas.
 
 - Árvore de Decisão com o Pacote 'tree': Uma árvore de decisão é construída usando o pacote 'tree' e os dados especificados. A árvore é plotada e suas previsões são avaliadas.
@@ -662,6 +743,7 @@ print(results)
 - Podar a Árvore: A árvore construída anteriormente é podada para melhorar seu desempenho e reduzir o overfitting.
 
 - Árvore de Regressão com o Pacote 'rpart': Uma árvore de regressão é construída usando o pacote 'rpart' e os dados especificados. A árvore é plotada e suas previsões são avaliadas usando RMSE e MAD.
+
 ```{r}
 # Árvore de Decisão com formulação explícita
 formula <- DFS_STATUS ~ TUMOR_STAGE
