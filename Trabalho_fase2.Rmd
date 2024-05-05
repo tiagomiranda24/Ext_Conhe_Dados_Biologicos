@@ -60,7 +60,7 @@ carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com
 carcinoma de bexiga "secundário" (já tratado com quimioterapia ou
 radiação).
 
-### Fase 1: Exploração e Análise de Dados
+## Fase 1: Exploração e Análise de Dados
 
 A primeira fase compreenderá as seguintes etapas: explicação da origem e
 relevância dos dados; realização de tarefas de preparação e
@@ -595,7 +595,7 @@ pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", c
 
 ```
 
-### Análise de Enriquecimento
+## Análise de Enriquecimento
 
 Análise de Enriquecimento Funcional
 para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
@@ -829,6 +829,48 @@ my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 - Divisão de Conjuntos de Treino/Teste: Os dados são divididos em conjuntos de treino e teste usando uma proporção de 70/30. Isso é feito para permitir a avaliação do desempenho dos modelos em dados não vistos.
 
 - Modelagem e Avaliação com k-NN: Um modelo de k-vizinhos mais próximos (k-NN) é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC, sensibilidade e especificidade.
+
+```{r}
+# Carregar o pacote caret
+library(caret)
+
+# Divisão em conjuntos de treino/teste com proporção de 70/30
+train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)  
+trainData <- bladder_clin[train_indices, ]
+testData <- bladder_clin[-train_indices, ]
+
+# Converter variável categórica em fator apenas para dados de treino
+trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
+
+# Verificar e tratar valores ausentes
+if (anyNA(trainData) || anyNA(testData)) {
+  cat("Os dados contêm valores NA. Trate os valores ausentes antes de prosseguir.")
+} else {
+  # Selecionar colunas relevantes
+  relevant_columns <- c("AGE", "AJCC_PATHOLOGIC_TUMOR_STAGE", "BUFFA_HYPOXIA_SCORE", 
+                        "ETHNICITY", "OS_MONTHS", "OS_STATUS", "PFS_MONTHS", "PFS_STATUS", 
+                        "RACE", "SEX", "TMB_NONSYNONYMOUS", "TUMOR_STAGE", "DFS_STATUS")
+
+  # Selecionar colunas relevantes nos dados de treinamento e teste
+  trainData <- trainData[, relevant_columns]
+  testData <- testData[, relevant_columns]
+
+  # Padronizar os dados
+  preProcValues <- preProcess(trainData, method = c("center", "scale"))
+  trainData <- predict(preProcValues, trainData)
+  testData <- predict(preProcValues, testData)
+
+  # Treinar o modelo KNN com validação cruzada
+  fitControl <- trainControl(method = "cv", number = 5)
+  model <- train(DFS_STATUS ~ ., data = trainData, method = "knn", trControl = fitControl, preProcess = c("center", "scale"))
+
+  # Avaliar o modelo
+  predictions <- predict(model, testData)
+  confusionMatrix(predictions, testData$DFS_STATUS)
+}
+
+```
+
 
 ```{r}
 # Carregar bibliotecas
