@@ -87,7 +87,8 @@ análises de forma adequada e precisa.
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano"), ask = FALSE)
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano", "MLInterfaces"), ask = FALSE)
+
 
 if (!requireNamespace("GGally", quietly = TRUE))
   install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
@@ -557,22 +558,36 @@ impactando a precisão das estimativas de dispersão e consequentemente
 dos testes.
 
 ```{r}
-# Visualização dos Resultados:
-#library(EnhancedVolcano)
-# Volcano Plot
+## Visualização dos Resultados:
+
+# Volcano Plot 
 EnhancedVolcano(res,
                 lab = rownames(res),
                 x = 'log2FoldChange',
                 y = 'padj',
                 title = 'Volcano plot',
                 pCutoff = 0.1,
-                FCcutoff = 0.5)
+                FCcutoff = 0.5,
+                labSize = 3,        # Tamanho das labels dos pontos no gráfico
+                xlim = c(-10, 15))  # Limites nos eixos x
+
+
+# Volcano Plot ampliado (Nota: certos resultados estão a ser excluídas neste gráfico!)
+EnhancedVolcano(res,
+                lab = rownames(res),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano plot',
+                pCutoff = 0.1,
+                FCcutoff = 0.5,
+                labSize = 3,        # Tamanho das labels dos pontos no gráfico
+                xlim = c(-5, 5),    # Limites no eixo x
+                ylim = c(0, 10))    # Limites no eixo y
 
 ```
 
 ```{r}
-# Heatmaps:
-#library(pheatmap)
+# Heatmaps
 
 topVarGenes <- head(order(rowVars(assay(dds)), decreasing = TRUE), 100)
 mat <- assay(dds)[topVarGenes, ]
@@ -602,13 +617,14 @@ head(gene_list_up)
 gene_list_up_simplified <- gsub("\\..+$", "", gene_list_up)
 
 # Tentar a conversão novamente usando os IDs simplificados
-gene_list_up_entrez <- select(org.Hs.eg.db, 
-                              keys = gene_list_up_simplified, 
-                              columns = "ENTREZID", 
-                              keytype = "ENSEMBL")
+gene_list_up_entrez = AnnotationDbi::select(org.Hs.eg.db, 
+                      keys = gene_list_up_simplified, 
+                      columns = "ENTREZID", 
+                      keytype = "ENSEMBL")
 
 # Verificar os resultados da conversão
 head(gene_list_up_entrez)
+
 
 ```
 
@@ -616,19 +632,21 @@ head(gene_list_up_entrez)
 library(clusterProfiler)
 
 # Realizar a análise de enriquecimento para os genes up-regulated
-enrich_res_up <- enrichGO(gene         = gene_list_up_entrez$ENTREZID,
-                          OrgDb        = org.Hs.eg.db,
-                          keyType      = "ENTREZID",
-                          ont          = "BP",
-                          pAdjustMethod= "BH",
-                          qvalueCutoff = 0.05)
+enrich_res_up <- enrichGO(gene          = gene_list_up_entrez$ENTREZID,
+                          OrgDb         = org.Hs.eg.db,
+                          keyType       = "ENTREZID",
+                          ont           = "BP",
+                          pAdjustMethod = "BH",
+                          qvalueCutoff  = 0.05
+                          )
 
 # Verificar os resultados da análise de enriquecimento
 if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
-  print(as.data.frame(summary(enrich_res_up)))
+  print(as.data.frame(enrich_res_up))
 } else {
   print("No significant enrichment found.")
 }
+
 ```
 
 #### Resultados de Enriquecimento
@@ -665,8 +683,8 @@ pheatmap(sampleDists, col = heat.colors(10))
 ## PCA ploting
 
 ```{r}
-
 # Função para gerar PCA plots corrigida
+
 # Carregar os dados
 bladder_numeric <- bladder_clin
 
@@ -686,7 +704,7 @@ filtered_data <- bladder_numeric[, cat_cols_filtered]
 dummy_model <- dummyVars(~ ., data = filtered_data)
 bladder_numeric_dummy <- predict(dummy_model, filtered_data)
 
-# Combine as colunas categóricas codificadas com as numéricas
+# Combina as colunas categóricas codificadas com as numéricas
 numeric_cols <- bladder_numeric[, sapply(bladder_numeric, is.numeric)]
 final_data <- cbind(numeric_cols, bladder_numeric_dummy)
 
@@ -694,6 +712,7 @@ final_data <- cbind(numeric_cols, bladder_numeric_dummy)
 if (length(which(sapply(final_data, is.numeric))) < 2) {
   stop("Final_data doesn't have enough numeric columns for PCA.")
 }
+
 # Verificar se o conjunto de dados contém dados suficientes
 if (ncol(final_data) == 0 || nrow(final_data) == 0) {
   stop("Final_data is empty or doesn't contain any data.")
@@ -724,6 +743,7 @@ plot_pca <- function(data, group_var, title) {
     
     print(plot)
 }
+
 # Gerar gráficos de PCA para cada coluna
 plots <- lapply(columns_coded, function(col) {
     tryCatch({
@@ -809,6 +829,7 @@ my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 - Divisão de Conjuntos de Treino/Teste: Os dados são divididos em conjuntos de treino e teste usando uma proporção de 70/30. Isso é feito para permitir a avaliação do desempenho dos modelos em dados não vistos.
 
 - Modelagem e Avaliação com k-NN: Um modelo de k-vizinhos mais próximos (k-NN) é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC, sensibilidade e especificidade.
+
 ```{r}
 # Carregar bibliotecas
 library(caret)
@@ -836,14 +857,38 @@ testData <- bladder_clin[-train_indices, ]
 trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
 testData$DFS_STATUS <- as.factor(testData$DFS_STATUS)
 
+# Extrair o nome da variável de resposta
+response_var <- "DFS_STATUS"
+
+# Extrair o nome das variáveis preditoras
+predictor_vars <- setdiff(names(trainData), response_var)
+
 # Normalizar os dados
-preProcValues <- preProcess(trainData, method = c("center", "scale"))
-trainData <- predict(preProcValues, trainData)
-testData <- predict(preProcValues, testData)
+preProcValues <- preProcess(trainData[, predictor_vars], method = c("center", "scale"))
+trainData[, predictor_vars] <- predict(preProcValues, trainData[, predictor_vars])
+testData[, predictor_vars] <- predict(preProcValues, testData[, predictor_vars])
+
+# Renivelar variáveis "factor" no testData com base nos níveis nos dados de treino
+for (col in predictor_vars) {
+  if (is.factor(testData[[col]])) {
+    testData[[col]] <- factor(testData[[col]], levels = levels(trainData[[col]]))
+  }
+}
 
 # Modelagem e avaliação com Naive Bayes
-model_nb <- naivebayes::naive_bayes(DFS_STATUS ~ ., data = trainData)
-nb_pred <- predict(model_nb, newdata = testData)
+model_nb <- naivebayes::naive_bayes(DFS_STATUS ~ ., data = trainData, laplace = 1)
+
+# Extrair variáveis de predição do testData
+testData_subset <- testData[, predictor_vars]
+
+# Casar os níveis das variáveis "factor" do testData com os do trainData
+for (col in predictor_vars) {
+  if (is.factor(testData_subset[[col]]) && is.factor(trainData[[col]])) {
+    testData_subset[[col]] <- factor(testData_subset[[col]], levels = levels(trainData[[col]]))
+  }
+}
+
+nb_pred <- predict(model_nb, newdata = testData_subset)
 t_nb <- table(nb_pred, testData$DFS_STATUS)
 pecc_nb <- 1 - sum(diag(t_nb)) / sum(t_nb)
 
@@ -885,45 +930,90 @@ text(arvreg)
 ```
 
 ```{r}
-#aqui ja funciona???
-# Carregar o pacote caret
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# 
+# BiocManager::install("MLInterfaces")
+
+library(class)
+library(nnet)
+library(rpart)
+library(MLInterfaces)
+library(genefilter)
 library(caret)
 
-# Divisão em conjuntos de treino/teste com proporção de 70/30
-train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)  
-trainData <- bladder_clin[train_indices, ]
-testData <- bladder_clin[-train_indices, ]
 
-# Converter variável categórica em fator apenas para dados de treino
-trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
-
-# Verificar e tratar valores ausentes
-if (anyNA(trainData) || anyNA(testData)) {
-  cat("Os dados contêm valores NA. Trate os valores ausentes antes de prosseguir.")
-} else {
-  # Selecionar colunas relevantes
-  relevant_columns <- c("AGE", "AJCC_PATHOLOGIC_TUMOR_STAGE", "BUFFA_HYPOXIA_SCORE", 
-                        "ETHNICITY", "OS_MONTHS", "OS_STATUS", "PFS_MONTHS", "PFS_STATUS", 
-                        "RACE", "SEX", "TMB_NONSYNONYMOUS", "TUMOR_STAGE", "DFS_STATUS")
-
-  # Selecionar colunas relevantes nos dados de treinamento e teste
-  trainData <- trainData[, relevant_columns]
-  testData <- testData[, relevant_columns]
-
-  # Padronizar os dados
-  preProcValues <- preProcess(trainData, method = c("center", "scale"))
-  trainData <- predict(preProcValues, trainData)
-  testData <- predict(preProcValues, testData)
-
-  # Treinar o modelo KNN com validação cruzada
-  fitControl <- trainControl(method = "cv", number = 5)
-  model <- train(DFS_STATUS ~ ., data = trainData, method = "knn", trControl = fitControl, preProcess = c("center", "scale"))
-
-  # Avaliar o modelo
-  predictions <- predict(model, testData)
-  confusionMatrix(predictions, testData$DFS_STATUS)
+# Função para treinar e avaliar o modelo k-NN
+train_eval_knn_model <- function(train, test, target_train, target_test, k = 1) {
+  valores.previstos = knn(train, test, target_train, k)
+  accuracy = sum(valores.previstos == target_test) / length(target_test)
+  return(list(pred = valores.previstos, accuracy = accuracy))
 }
+
+# Função para treinar e avaliar o modelo ANN
+train_eval_ann_model <- function(train, test, target_train, target_test, size = 3) {
+  ann_model = nnet(target_train ~ ., data = as.data.frame(train), size = size)
+  valores.prev.ann = predict(ann_model, newdata = as.data.frame(test), type = "class")
+  accuracy = sum(valores.prev.ann == target_test) / length(target_test)
+  return(list(pred = valores.prev.ann, accuracy = accuracy))
+}
+
+# Função para treinar e avaliar o modelo Árvore de Decisão
+train_eval_decision_tree_model <- function(train, test, target_train, target_test) {
+  arv_model = rpart(target_train ~ ., data = as.data.frame(train))
+  classes.previstas_arv = predict(arv_model, newdata = as.data.frame(test), type = "class")
+  accuracy = sum(classes.previstas_arv == target_test) / length(target_test)
+  return(list(pred = classes.previstas_arv, accuracy = accuracy))
+}
+
+# Função para treinar e avaliar o modelo usando MLInterfaces
+train_eval_ml_model <- function(train, target_train) {
+  knnResult = MLearn(target_train ~ ., train, knnI(k = 1), 1:ncol(train))
+  return(confuMat(knnResult))
+}
+
+# Extrai a matrix de expressão do dataframe
+expr_matrix <- as.matrix(dados_mrna_df)
+
+# Dividir os dados em treino e teste
+train_indices <- sample(1:nrow(dados_mrna_df), 60)
+train <- expr_matrix[train_indices, ]
+test <- expr_matrix[-train_indices, ]
+target_train <- bladder_clin$DFS_STATUS[train_indices]
+target_test <- bladder_clin$DFS_STATUS[-train_indices]
+
+###############
+# Variável target_train tem valores NA, vamos corrigir isso:
+# Converter target_train de factor para character
+target_train <- as.character(target_train)
+
+# Substituição de valores NA com o mode
+mode_target_train <- names(sort(-table(target_train)))[1]
+target_train[is.na(target_train)] <- mode_target_train
+
+# Retornar target_train para factor
+target_train <- as.factor(target_train) 
+
+###############
+
+# Converter target_test para factor
+target_test <- as.factor(target_test)
+
+# Treinar e avaliar o modelo k-NN
+knn_result <- train_eval_knn_model(train, test, target_train, target_test, k = 1)
+
+# Treinar e avaliar o modelo ANN
+ann_result <- train_eval_ann_model(train, test, target_train, target_test, size = 3)
+
+# Treinar e avaliar o modelo Árvore de Decisão
+decision_tree_result <- train_eval_decision_tree_model(train, test, target_train, target_test)
+
+# Treinar e avaliar o modelo usando MLInterfaces
+ml_model_result <- train_eval_ml_model(train, target_train)
+
 ```
+
+
 ### Bibliografia
 
 Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current
