@@ -95,6 +95,15 @@ if (!requireNamespace("GGally", quietly = TRUE))
 if (!requireNamespace("rentrez", quietly = TRUE))
   install.packages("rentrez")
 
+if (!requireNamespace("umap", quietly = TRUE))
+  install.packages("umap")
+
+if (!requireNamespace("ROSE", quietly = TRUE))
+  install.packages("ROSE")
+
+if (!requireNamespace("naivebayes", quietly = TRUE))
+  install.packages("naivebayes")
+
 ```
 
 ```{r, include=FALSE}
@@ -114,6 +123,11 @@ library(org.Hs.eg.db)
 library(EnhancedVolcano)
 library(pheatmap)
 library(rentrez)
+library(caret)
+library(stats)
+library(cluster)
+library(umap)
+library(ROSE)
 
 ```
 
@@ -289,8 +303,8 @@ bladder_clin <- bladder_clin %>%
     RACE = as.factor(RACE)
   )
 
-# Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
-bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
+# # Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
+# bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
 
 # Verificar se ainda há valores NA
 summary(bladder_clin)
@@ -299,6 +313,99 @@ summary(bladder_clin)
 
 ```
 
+# Pie Charts (Gráficos de Pizza)
+
+```{r}
+### Pie Charts
+## Código para fazer o plot pie chart de CADA UMA das colunas categóricas
+
+# Definição dos títulos de cada piechart
+plot_titles <- c(
+  "Overall Survival Status",                # OS_STATUS
+  "Sex",                                    # SEX
+  "Ethnicity Category",                     # ETHNICITY
+  "Race Category",                          # RACE
+  "AJCC Metastasis Stage Code",             # PATH_M_STAGE
+  "AJCC Neoplasm Disease Lymph Node Stage", # PATH_N_STAGE
+  "AJCC Neoplasm Disease Stage",            # AJCC_PATHOLOGIC_TUMOR_STAGE
+  "AJCC Tumor Stage",                       # PATH_T_STAGE
+  "Analysis Cohort"                         # ANALYSIS_COHORT
+)
+
+# Definição das frequências e das frequências relativas
+freq_list <- list(
+  OS_STATUS = prop.table(table(bladder_clin$OS_STATUS)),
+  SEX = prop.table(table(bladder_clin$SEX)),
+  ETHNICITY = prop.table(table(bladder_clin$ETHNICITY)),
+  RACE = prop.table(table(bladder_clin$RACE)),
+  PATH_M_STAGE = prop.table(table(bladder_clin$PATH_M_STAGE)), 
+  PATH_N_STAGE = prop.table(table(bladder_clin$PATH_N_STAGE)), 
+  AJCC_PATHOLOGIC_TUMOR_STAGE = prop.table(table(bladder_clin$AJCC_PATHOLOGIC_TUMOR_STAGE)), 
+  PATH_T_STAGE = prop.table(table(bladder_clin$PATH_T_STAGE)), 
+  ANALYSIS_COHORT = prop.table(table(bladder_clin$ANALYSIS_COHORT))
+)
+
+# Criação de um dataframe com as frequências e os nomes das colunas
+pie_data <- lapply(freq_list, function(freq_rel) {
+  data.frame(labels = names(freq_rel), values = as.numeric(freq_rel))
+})
+
+# Criação dos pie charts
+for (i in seq_along(plot_titles)) {
+  plot_pies <- ggplot(pie_data[[i]], aes(x = "", y = values, fill = labels)) +
+    geom_bar(stat = "identity", width = 1) +
+    geom_text(aes(label = paste(round(freq_list[[i]] * 100, 2), "%")), position = position_stack(vjust = 0.5)) +
+    coord_polar("y", start = 0) + 
+    labs(title = plot_titles[i], fill = "") +
+    theme_void() +
+    theme(
+      legend.position = "left",
+      plot.title = element_text(hjust = 0.5), 
+      plot.margin = margin(1)
+    )
+  
+  print(plot_pies)
+}
+```
+
+# Barplots (Gráficos de Barras)
+
+```{r}
+# Função para criar os barplots através de iterações
+create_barplot <- function(data, column_name, breaks, title) {
+  table_data <- table(cut(data[[column_name]], breaks = breaks, include.lowest = TRUE))
+  
+  if (length(table_data) > length(breaks)) {
+    table_data[length(table_data)] <- table_data[length(table_data)] + sum(data[[column_name]] > breaks[length(breaks)])
+  }
+  
+  # Conversão para dataframe
+  df <- data.frame(interval = names(table_data), count = as.numeric(table_data))
+  df$interval <- factor(df$interval, levels = unique(df$interval))
+  
+  # Barplot geral
+  plot_bar <- ggplot(df, aes(x = interval, y = count)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    labs(title = title,
+         x = "",
+         y = "Frequência relativa") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(hjust = 0.5))
+  
+  return(plot_bar)
+}
+
+create_barplot(bladder_clin, "MUTATION_COUNT", c(0, seq(50, 500, by = 50), Inf), "Mutation Count")
+create_barplot(bladder_clin, "FRACTION_GENOME_ALTERED", c(0, seq(0.05, 0.85, by = 0.05), Inf), "Fraction Genome Altered")
+create_barplot(bladder_clin, "AGE", unique(c(0, seq(40, max(bladder_clin$AGE), by = 5), max(bladder_clin$AGE))), "Diagnosis Age")
+create_barplot(bladder_clin, "MSI_SCORE_MANTIS", c(min(bladder_clin$MSI_SCORE_MANTIS), seq(0, 1, by = 0.1), Inf), "MSI MANTIS Score")
+create_barplot(bladder_clin, "MSI_SENSOR_SCORE", c(-Inf, 4, 10, Inf), "MSI SENSOR Score")
+create_barplot(bladder_clin, "ANEUPLOIDY_SCORE", c(seq(0, max(bladder_clin$ANEUPLOIDY_SCORE), by = 2)), "Aneuploidy Score")
+create_barplot(bladder_clin, "BUFFA_HYPOXIA_SCORE", c(-Inf, seq(-35, 45, by = 5), Inf), "Buffa Hypoxia Score")
+
+```
+# Pairplots
 
 ```{r}
 ### Aqui vamos observar os estados, distribuições e correlações dos nossos dados, incluindo entender o que podemos fazer para normalização dos dados. ###
@@ -372,60 +479,6 @@ pairplot2 # Pairplot PÓS-NORMALIZAÇÃO
 ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
 
 ```
-# Pie Charts (Gráficos de Pizza)
-
-```{r}
-### Pie Charts
-## Código para fazer o plot pie chart de CADA UMA das colunas categóricas
-
-# Definição dos títulos de cada piechart
-plot_titles <- c(
-  "Overall Survival Status",                # OS_STATUS
-  "Sex",                                    # SEX
-  "Ethnicity Category",                     # ETHNICITY
-  "Race Category",                          # RACE
-  "AJCC Metastasis Stage Code",             # PATH_M_STAGE
-  "AJCC Neoplasm Disease Lymph Node Stage", # PATH_N_STAGE
-  "AJCC Neoplasm Disease Stage",            # AJCC_PATHOLOGIC_TUMOR_STAGE
-  "AJCC Tumor Stage",                       # PATH_T_STAGE
-  "Analysis Cohort"                         # ANALYSIS_COHORT
-)
-
-# Definição das frequências e das frequências relativas
-freq_list <- list(
-  OS_STATUS = prop.table(table(bladder_clin$OS_STATUS)),
-  SEX = prop.table(table(bladder_clin$SEX)),
-  ETHNICITY = prop.table(table(bladder_clin$ETHNICITY)),
-  RACE = prop.table(table(bladder_clin$RACE)),
-  PATH_M_STAGE = prop.table(table(bladder_clin$PATH_M_STAGE)), 
-  PATH_N_STAGE = prop.table(table(bladder_clin$PATH_N_STAGE)), 
-  AJCC_PATHOLOGIC_TUMOR_STAGE = prop.table(table(bladder_clin$AJCC_PATHOLOGIC_TUMOR_STAGE)), 
-  PATH_T_STAGE = prop.table(table(bladder_clin$PATH_T_STAGE)), 
-  ANALYSIS_COHORT = prop.table(table(bladder_clin$ANALYSIS_COHORT))
-)
-
-# Criação de um dataframe com as frequências e os nomes das colunas
-pie_data <- lapply(freq_list, function(freq_rel) {
-  data.frame(labels = names(freq_rel), values = as.numeric(freq_rel))
-})
-
-# Criação dos pie charts
-for (i in seq_along(plot_titles)) {
-  plot <- ggplot(pie_data[[i]], aes(x = "", y = values, fill = labels)) +
-    geom_bar(stat = "identity", width = 1) +
-    geom_text(aes(label = paste(round(freq_list[[i]] * 100, 2), "%")), position = position_stack(vjust = 0.5)) +
-    coord_polar("y", start = 0) + 
-    labs(title = plot_titles[i], fill = "") +
-    theme_void() +
-    theme(
-      legend.position = "left",
-      plot.title = element_text(hjust = 0.5), 
-      plot.margin = margin(1)
-    )
-  
-  print(plot)
-}
-```
 
 ## Análise de Expressão Diferencial
 
@@ -465,9 +518,9 @@ O próximo comando lista tanto dos dados clínicos colData(data) quanto
 dos dados de expressão rowData(data) para futuras analises:
 
 ```{r}
-colData(data) 
-rowData(data)
-names(assays(data))
+# colData(data) 
+# rowData(data)
+# names(assays(data))
 ```
 
 ```{r}
@@ -607,29 +660,112 @@ sampleDists <- dist(t(assay(vsd)))
 # Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
 #pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
 pheatmap(sampleDists, col = heat.colors(10))
+```
 
+## PCA ploting
 
-######### Ver este ultimo tópico que não está a correr
-# Principal component plot of the samples
-#plotPCA(vsd, intgroup = c("condition"))
-plotPCA(vsd, intgroup = "condition")
+```{r}
+
+# Função para gerar PCA plots corrigida
+# Carregar os dados
+bladder_numeric <- bladder_clin
+
+# Encontrar colunas categóricas com mais de 1 nível
+cat_cols <- sapply(bladder_numeric, is.factor)
+
+# Filtrar as colunas categóricas problemáticas corretamente
+cat_cols_filtered <- names(bladder_numeric)[cat_cols & sapply(bladder_numeric[, cat_cols], function(col) {
+  n_unique <- length(unique(na.omit(col)))
+  n_unique > 1
+})]
+
+# Criar um novo dataframe apenas com as colunas filtradas corretamente
+filtered_data <- bladder_numeric[, cat_cols_filtered]
+
+# Codificação One-Hot para as colunas categóricas restantes
+dummy_model <- dummyVars(~ ., data = filtered_data)
+bladder_numeric_dummy <- predict(dummy_model, filtered_data)
+
+# Combine as colunas categóricas codificadas com as numéricas
+numeric_cols <- bladder_numeric[, sapply(bladder_numeric, is.numeric)]
+final_data <- cbind(numeric_cols, bladder_numeric_dummy)
+
+# Verifica se final_data tem colunas numéricas
+if (length(which(sapply(final_data, is.numeric))) < 2) {
+  stop("Final_data doesn't have enough numeric columns for PCA.")
+}
+# Verificar se o conjunto de dados contém dados suficientes
+if (ncol(final_data) == 0 || nrow(final_data) == 0) {
+  stop("Final_data is empty or doesn't contain any data.")
+}
+
+columns_coded <- c("FRACTION_GENOME_ALTERED", "MUTATION_COUNT", "PRIOR_DX.No", "AGE")
+
+plot_pca <- function(data, group_var, title) {
+    print(paste("Processing", group_var))
+    
+    if (!group_var %in% colnames(data)) {
+        stop(paste("Coluna", group_var, "não encontrada nos dados"))
+    }
+    
+    if (all(is.na(data[[group_var]]))) {
+        stop(paste("Coluna", group_var, "contém apenas valores NA"))
+    }
+    
+    pca <- prcomp(data[, !names(data) %in% group_var], scale. = TRUE)
+    pca_data <- data.frame(pca$x[, 1:2], Group = data[[group_var]])
+    
+    print(head(pca_data))  # Para verificar os primeiros resultados
+    
+    plot <- ggplot(pca_data, aes(x = PC1, y = PC2, color = Group)) +
+        geom_point(size = 3) +
+        ggtitle(title) +
+        theme_minimal()
+    
+    print(plot)
+}
+# Gerar gráficos de PCA para cada coluna
+plots <- lapply(columns_coded, function(col) {
+    tryCatch({
+        print(paste("Generating PCA for", col))
+        plot_pca(final_data, col, paste("PCA para", col))
+    }, error = function(e) {
+        message(paste("Erro ao processar", col, ":", e$message))
+        NULL
+    })
+})
+
+```
+
+```{r}
+
+# Filtrar dados numéricos e tratar valores NA
+numeric_cols <- bladder_numeric[, sapply(bladder_numeric, is.numeric)]
+filtered_data <- na.omit(scale(numeric_cols))  # Escalar todos os dados numéricos
+
+# Reduzir a dimensionalidade usando UMAP
+umap_result <- umap(filtered_data)
+umap_data <- as.data.frame(umap_result$layout)
+colnames(umap_data) <- c("UMAP1", "UMAP2")
+
+# Aplicar K-means clustering nos dados reduzidos
+set.seed(42)
+kmeans_result <- kmeans(umap_data, centers = 3)  # Ajustar o número de clusters conforme necessário
+
+# Adicionar resultados de clusterização ao data frame
+umap_data$Cluster <- as.factor(kmeans_result$cluster)
+
+# Visualizar os clusters no espaço UMAP
+ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster)) +
+  geom_point(size = 3) +
+  ggtitle("Clusters in UMAP space") +
+  theme_minimal()
+
 ```
 
 # Realização do Clustering hierárquico
 
 ```{r}
-# Extrair os valores numéricos dos dados do cBioPortal
-bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
-
-# Escalando os dados
-bladder_scaled <- scale(bladder_numeric)
-
-# Cálculo da matriz de distâncias usando a distância de Manhattan
-dist_bladder <- dist(bladder_scaled, method = "manhattan")
-
-# Clustering hierárquico
-cl_bladder <- hclust(dist_bladder, method = "average")
-
 # Função para plotar o dendrograma com labels
 my.plot.hc <- function(hclust, lab = 1:length(hclust$order), 
                        lab.col = rep(1, length(hclust$order)), 
@@ -647,8 +783,21 @@ my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
        srt = 90, adj = c(1,0.5), xpd = NA, ...)
 }
 
-# Plotagem do dendrograma com os clusters de acordo com a variável "Muscle.loss"
-my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
+# Extrair os valores numéricos
+bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
+
+# Redução de dimensionalidade com PCA - fica bem mais rápido
+pca_result <- prcomp(bladder_numeric, center = TRUE, scale. = TRUE)
+bladder_reduced <- pca_result$x[, 1:10]  # Utilizar o número adequado de PCs 
+
+# Calcular a matriz de distâncias
+dist_pca <- dist(bladder_reduced, method = "manhattan")
+
+# Clustering hierárquico com dados reduzidos
+cl_pca <- hclust(dist_pca, method = "average")
+
+# Plotar o dendrograma
+my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 ```
 
 ## Machine Learning
@@ -660,123 +809,121 @@ my.plot.hc(cl_bladder, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 - Divisão de Conjuntos de Treino/Teste: Os dados são divididos em conjuntos de treino e teste usando uma proporção de 70/30. Isso é feito para permitir a avaliação do desempenho dos modelos em dados não vistos.
 
 - Modelagem e Avaliação com k-NN: Um modelo de k-vizinhos mais próximos (k-NN) é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC, sensibilidade e especificidade.
-
 ```{r}
-# Carregando as bibliotecas necessárias
-library(MASS)
-library(class)
-library(e1071)
+# Carregar bibliotecas
+library(caret)
 library(party)
+library(e1071)
+library(naivebayes)
+library(rpart)
 
-# Funções para métricas de erro
-pecc <- function(obs, pred) sum(obs == pred) / length(obs)
-rmse <- function(obs, pred) sqrt(mean((obs - pred)^2))
-mad <- function(obs, pred) mean(abs(obs - pred))
+# Função para calcular RMSE
+rmse <- function(pred, obs) {
+  sqrt(mean((pred - obs)^2))
+}
 
-# Divisão em conjuntos de treino/teste com proporção de 70/30
-set.seed(12345)
-ind <- sample(2, nrow(bladder_clin), replace = TRUE, prob = c(0.7, 0.3))
-trainData <- bladder_clin[ind == 1, ]
-testData <- bladder_clin[ind == 2, ]
+# Função para calcular MAD
+mad <- function(pred, obs) {
+  mean(abs(pred - obs))
+}
 
-# Modelagem e avaliação com k-NN
-tryCatch({
-  # Verifica se há valores NA nos dados
-  if(anyNA(trainData) || anyNA(testData)) {
-    stop("Dados contêm valores NA. Por favor, trate os valores ausentes antes de prosseguir.")
-  }
-  
-  # Modelagem com k-NN
-  knn_pred <- knn(trainData[, 1:4], testData[, 1:4], trainData$DFS_STATUS)
-  t_knn <- table(knn_pred, testData$DFS_STATUS)
-  pecc_knn <- pecc(knn_pred, testData$DFS_STATUS)
-  sensib_knn <- t_knn[2, 2] / sum(testData$DFS_STATUS == "DiseaseFree")  # Sensibilidade
-  especif_knn <- t_knn[1, 1] / sum(testData$DFS_STATUS == "Disease")  # Especificidade
-  
-  # Apresentação dos resultados
-  results <- data.frame(
-    Model = "k-NN",
-    PECC = pecc_knn,
-    Sensibilidade = sensib_knn,
-    Especificidade = especif_knn
-  )
-  print(results)
-  
-}, error = function(e) {
-  cat("Erro durante a modelagem e avaliação com k-NN:", conditionMessage(e), "\n")
-})
-```
+# Preparar os dados
+train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)
+trainData <- bladder_clin[train_indices, ]
+testData <- bladder_clin[-train_indices, ]
 
-- Modelagem e Avaliação com Naive Bayes: Um modelo de Naive Bayes é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC.
+# Converter a variável de resposta em fator
+trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
+testData$DFS_STATUS <- as.factor(testData$DFS_STATUS)
 
-- Modelagem e Avaliação com Árvores de Decisão: Uma árvore de decisão é construída com os dados de treino e usada para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC.
+# Normalizar os dados
+preProcValues <- preProcess(trainData, method = c("center", "scale"))
+trainData <- predict(preProcValues, trainData)
+testData <- predict(preProcValues, testData)
 
-- Apresentação dos Resultados: Os resultados das avaliações são organizados em um dataframe e impressos na tela.
-
-```{r}
 # Modelagem e avaliação com Naive Bayes
-model_nb <- naiveBayes(DFS_STATUS ~ ., data = trainData)  # Modelagem do Naive Bayes
-nb_pred <- predict(model_nb, newdata = testData)  # Previsões do modelo
-t_nb <- table(nb_pred, testData$DFS_STATUS)  # Tabela de confusão
-pecc_nb <- pecc(nb_pred, testData$DFS_STATUS)  # Cálculo do PECC
+model_nb <- naivebayes::naive_bayes(DFS_STATUS ~ ., data = trainData)
+nb_pred <- predict(model_nb, newdata = testData)
+t_nb <- table(nb_pred, testData$DFS_STATUS)
+pecc_nb <- 1 - sum(diag(t_nb)) / sum(t_nb)
 
 # Modelagem e avaliação com Árvores de Decisão
-blad_ctree <- ctree(DFS_STATUS ~ ., data = trainData)  # Modelagem da árvore de decisão
-testPred_ctree <- predict(blad_ctree, newdata = testData)  # Previsões da árvore
-t_ctree <- table(testPred_ctree, testData$DFS_STATUS)  # Tabela de confusão
-pecc_ctree <- pecc(testPred_ctree, testData$DFS_STATUS)  # Cálculo do PECC
+blad_ctree <- ctree(DFS_STATUS ~ ., data = trainData)
+testPred_ctree <- predict(blad_ctree, newdata = testData)
+t_ctree <- table(testPred_ctree, testData$DFS_STATUS)
+pecc_ctree <- 1 - sum(diag(t_ctree)) / sum(t_ctree)
+
+# Podar a árvore de decisão
+tree1 <- tree(DFS_STATUS ~ ., data = trainData)
+tree2 <- prune.tree(tree1, best = 3)
+testPred_tree2 <- predict(tree2, newdata = testData, type = "class")
+t_tree2 <- table(testPred_tree2, testData$DFS_STATUS)
+pecc_tree2 <- 1 - sum(diag(t_tree2)) / sum(t_tree2)
+
+# Modelagem e avaliação com Árvore de Regressão usando rpart
+arvreg <- rpart(AGE ~ ., data = trainData)
+testPred_arvreg <- predict(arvreg, newdata = testData)
+rmse_arvreg <- rmse(testPred_arvreg, testData$AGE)
+mad_arvreg <- mad(testPred_arvreg, testData$AGE)
 
 # Apresentação dos resultados
 results <- data.frame(
-  Model = c("k-NN", "Naive Bayes", "Árvores de Decisão"),
-  PECC = c(pecc_knn, pecc_nb, pecc_ctree),
-  Sensibilidade = c(sensib_knn, NA, NA),  # Sensibilidade não calculada para Naive Bayes
-  Especificidade = c(especif_knn, NA, NA)  # Especificidade não calculada para Naive Bayes
+  Model = c("Naive Bayes", "Árvore de Decisão", "Árvore Podada"),
+  PECC = c(pecc_nb, pecc_ctree, pecc_tree2)
 )
 print(results)
-```
+cat("RMSE para Árvore de Regressão:", rmse_arvreg, "\n")
+cat("MAD para Árvore de Regressão:", mad_arvreg, "\n")
 
-- Árvore de Decisão com Formulação Explícita: Uma árvore de decisão é construída explicitamente usando a fórmula especificada e os dados de treino. A árvore é plotada e suas previsões são avaliadas.
-
-- Árvore de Decisão com o Pacote 'tree': Uma árvore de decisão é construída usando o pacote 'tree' e os dados especificados. A árvore é plotada e suas previsões são avaliadas.
-
-- Podar a Árvore: A árvore construída anteriormente é podada para melhorar seu desempenho e reduzir o overfitting.
-
-- Árvore de Regressão com o Pacote 'rpart': Uma árvore de regressão é construída usando o pacote 'rpart' e os dados especificados. A árvore é plotada e suas previsões são avaliadas usando RMSE e MAD.
-
-```{r}
-# Árvore de Decisão com formulação explícita
-formula <- DFS_STATUS ~ TUMOR_STAGE
-blad_ctree <- ctree(formula, data = trainData)
-plot(blad_ctree)
-testPred2 <- predict(blad_ctree, newdata = testData)
-t_ctree2 <- table(testPred2, testData$DFS_STATUS)        
-pecc(testData$DFS_STATUS, testPred2)
-
-# Árvore de Decisão com o pacote 'tree'
-tree1 <- tree(DFS_STATUS ~ . - TUMOR_STAGE, data = bladder_clin) 
-plot(tree1)
-text(tree1)
-
-plot(bladder_clin$DFS_STATUS, bladder_clin$TUMOR_STAGE, pch = 19, col = as.numeric(bladder_clin$DFS_STATUS))
-partition.tree(tree1, label = "DFS_STATUS", add = TRUE)
-legend(2, 4.5, legend = unique(bladder_clin$DFS_STATUS), col = unique(as.numeric(bladder_clin$DFS_STATUS)), pch = 19)
-
-# Podar a árvore
-tree2 <- prune.tree(tree1, best = 3)
+# Plotar a árvore de decisão e a árvore de regressão
+par(mfrow = c(1, 2))
 plot(tree2)
 text(tree2)
-
-# Árvore de Regressão com o pacote 'rpart'
-arvreg <- rpart(TUMOR_STAGE ~ syct + mmin + mmax + chmax + chmin, data = TUMOR_STAGE_Tr)
 plot(arvreg)
 text(arvreg)
-val_prev <- predict(arvreg, newdata = TUMOR_STAGE_Ts)
-val_prev
-rmse(val_prev, TUMOR_STAGE_Ts$TUMOR_STAGE)
-mad(val_prev, TUMOR_STAGE_Ts$TUMOR_STAGE)
+
 ```
 
+```{r}
+#aqui ja funciona???
+# Carregar o pacote caret
+library(caret)
+
+# Divisão em conjuntos de treino/teste com proporção de 70/30
+train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)  
+trainData <- bladder_clin[train_indices, ]
+testData <- bladder_clin[-train_indices, ]
+
+# Converter variável categórica em fator apenas para dados de treino
+trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
+
+# Verificar e tratar valores ausentes
+if (anyNA(trainData) || anyNA(testData)) {
+  cat("Os dados contêm valores NA. Trate os valores ausentes antes de prosseguir.")
+} else {
+  # Selecionar colunas relevantes
+  relevant_columns <- c("AGE", "AJCC_PATHOLOGIC_TUMOR_STAGE", "BUFFA_HYPOXIA_SCORE", 
+                        "ETHNICITY", "OS_MONTHS", "OS_STATUS", "PFS_MONTHS", "PFS_STATUS", 
+                        "RACE", "SEX", "TMB_NONSYNONYMOUS", "TUMOR_STAGE", "DFS_STATUS")
+
+  # Selecionar colunas relevantes nos dados de treinamento e teste
+  trainData <- trainData[, relevant_columns]
+  testData <- testData[, relevant_columns]
+
+  # Padronizar os dados
+  preProcValues <- preProcess(trainData, method = c("center", "scale"))
+  trainData <- predict(preProcValues, trainData)
+  testData <- predict(preProcValues, testData)
+
+  # Treinar o modelo KNN com validação cruzada
+  fitControl <- trainControl(method = "cv", number = 5)
+  model <- train(DFS_STATUS ~ ., data = trainData, method = "knn", trControl = fitControl, preProcess = c("center", "scale"))
+
+  # Avaliar o modelo
+  predictions <- predict(model, testData)
+  confusionMatrix(predictions, testData$DFS_STATUS)
+}
+```
 ### Bibliografia
 
 Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current
