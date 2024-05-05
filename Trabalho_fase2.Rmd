@@ -235,6 +235,9 @@ unlist(lapply(bladder_clin, typeof)) # Verifica os tipos das colunas do conjunto
 ```
 
 ```{r}
+# # Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
+# bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
+
 # Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
 # Definir as variáveis como numéricas
 bladder_clin <- bladder_clin %>%
@@ -251,8 +254,7 @@ bladder_clin <- bladder_clin %>%
     AGE = as.numeric(AGE),
     BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
     OS_MONTHS = as.numeric(OS_MONTHS),
-    PFS_MONTHS = as.numeric(PFS_MONTHS),
-    #SAMPLE_COUNT = as.numeric(SAMPLE_COUNT),
+    PFS_MONTHS = as.numeric(PFS_MONTHS)
   )
 
 # Vamos substituir os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown". Define-se primeiro as colunas numéricas para conseguirmos correr o nosso código de substituição dos NAs.
@@ -283,16 +285,12 @@ bladder_clin <- bladder_clin %>%
     DFS_STATUS = as.factor(DFS_STATUS),
     sampleId = as.factor(sampleId),
     ANALYSIS_COHORT = as.factor(ANALYSIS_COHORT),
-    #CANCER_TYPE = as.factor(CANCER_TYPE),
-    #CANCER_TYPE_DETAILED = as.factor(CANCER_TYPE_DETAILED),
     DISTANT_METS = as.factor(DISTANT_METS),
     GRADE = as.factor(GRADE),
     LYMPH_NODE_STATUS = as.factor(LYMPH_NODE_STATUS),
-    #ONCOTREE_CODE = as.factor(ONCOTREE_CODE),
     PRIMARY_VS_SECONDARY = as.factor(PRIMARY_VS_SECONDARY),
     PRIOR_INTRAVESICAL_CHEMOTHERAPY = as.factor(PRIOR_INTRAVESICAL_CHEMOTHERAPY),
     SAMPLE_TYPE = as.factor(SAMPLE_TYPE),
-    #SOMATIC_STATUS = as.factor(SOMATIC_STATUS),
     TUMOR_STAGE = as.factor(TUMOR_STAGE),
     AJCC_PATHOLOGIC_TUMOR_STAGE = as.factor(AJCC_PATHOLOGIC_TUMOR_STAGE),
     COHORT = as.factor(COHORT),
@@ -303,9 +301,6 @@ bladder_clin <- bladder_clin %>%
     PATH_T_STAGE = as.factor(PATH_T_STAGE),
     RACE = as.factor(RACE)
   )
-
-# # Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
-# bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
 
 # Verificar se ainda há valores NA
 summary(bladder_clin)
@@ -529,7 +524,7 @@ dos dados de expressão rowData(data) para futuras analises:
 
 library(DESeq2)
 
-# Suponho que o nome do ensaio correto seja o "unstranded"
+# Usando o ensaio identificado como "unstranded"
 dds <- DESeqDataSetFromMatrix(countData = assay(data, "unstranded"),
                               colData = colData(data),
                               design = ~ gender)  # Ou outra variável de interesse
@@ -806,7 +801,7 @@ my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
 # Extrair os valores numéricos
 bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
 
-# Redução de dimensionalidade com PCA - fica bem mais rápido
+# Redução de dimensionalidade com PCA - torna o processo mais eficiente
 pca_result <- prcomp(bladder_numeric, center = TRUE, scale. = TRUE)
 bladder_reduced <- pca_result$x[, 1:10]  # Utilizar o número adequado de PCs 
 
@@ -822,13 +817,13 @@ my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 
 ## Machine Learning
 
-- Carregamento de bibliotecas: As bibliotecas necessárias, como 'MASS', 'class', 'e1071' e 'party', são carregadas para acesso às funções e métodos necessários.
-
-- Definição de Funções de Métricas de Erro: São definidas funções para calcular métricas de erro, como taxa de erro de classificação (PECC), erro médio quadrático (RMSE) e desvio médio absoluto (MAD).
-
-- Divisão de Conjuntos de Treino/Teste: Os dados são divididos em conjuntos de treino e teste usando uma proporção de 70/30. Isso é feito para permitir a avaliação do desempenho dos modelos em dados não vistos.
-
-- Modelagem e Avaliação com k-NN: Um modelo de k-vizinhos mais próximos (k-NN) é treinado com os dados de treino e usado para fazer previsões nos dados de teste. São calculadas métricas de desempenho, como PECC, sensibilidade e especificidade.
+-Dividimos os dados em conjuntos de treino e teste com uma proporção de 70/30.
+-Convertemos a variável categórica DFS_STATUS em fator apenas para os dados de treino.
+-Verificamos se existem valores ausentes nos dados.
+-Selecionamos as colunas relevantes nos dados de treinamento e teste.
+-Padronizamos os dados.
+-Treinamos o modelo KNN usando validação cruzada com 5 folds.
+-Por fim avaliamos o modelo usando a matriz de confusão.
 
 ```{r}
 # Carregar o pacote caret
@@ -870,7 +865,14 @@ if (anyNA(trainData) || anyNA(testData)) {
 }
 
 ```
-
+-Definimos as funções para calcular o RMSE (Root Mean Squared Error) e o MAD (Mean Absolute Deviation).
+-Preparamos os dados dividindo-os em conjuntos de treino e teste.
+-Convertemos a variável de resposta DFS_STATUS em fator para ambos os conjuntos de dados.
+-Extraimos o nome das variáveis preditoras.
+-Normalizamos os dados de treino e teste.
+-Realizamos a modelagem e avaliação com o algoritmo Naive Bayes.
+-Extraimos as variáveis preditoras do conjunto de dados de teste.
+-Garante que os níveis das variáveis categóricas no conjunto de dados de teste correspondem aos níveis no conjunto de dados de treino.
 
 ```{r}
 # Carregar bibliotecas
@@ -929,7 +931,14 @@ for (col in predictor_vars) {
     testData_subset[[col]] <- factor(testData_subset[[col]], levels = levels(trainData[[col]]))
   }
 }
+```
 
+-Para o Naive Bayes, o código realiza a previsão usando o modelo model_nb e calcula a tabela de confusão e a taxa de erro de classificação (PECC). No entanto obtemos um erro que nos impossibilita de avançar.
+-Para as Árvores de Decisão, são criados dois modelos: um sem poda (blad_ctree) e outro com poda (tree2). A previsão é feita para ambos os modelos e, em seguida, são calculadas as tabelas de confusão e as taxas de erro de classificação (PECC).
+-Para a Árvore de Regressão, o modelo é criado utilizando a variável AGE como variável de resposta. A previsão é feita e são calculados o RMSE e o MAD.
+-Os resultados são apresentados em um dataframe (results) e são exibidos na tela, junto com os valores de RMSE e MAD para a Árvore de Regressão.
+-Realizamos o plot das árvores de decisão e regressão.
+```{r}
 nb_pred <- predict(model_nb, newdata = testData_subset)
 t_nb <- table(nb_pred, testData$DFS_STATUS)
 pecc_nb <- 1 - sum(diag(t_nb)) / sum(t_nb)
@@ -968,7 +977,6 @@ plot(tree2)
 text(tree2)
 plot(arvreg)
 text(arvreg)
-
 ```
 
 ```{r}
