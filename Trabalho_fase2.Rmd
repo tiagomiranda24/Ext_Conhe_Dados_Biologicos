@@ -137,7 +137,7 @@ library(ROSE)
 Nesta fase é realizado o carregamento dos dados clinicos do estudo,
 explorados os ensaios do estudo disponiveis e organizados em dataframes:
 
-```{r pressure, echo=FALSE}
+```{r}
 ## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
 
 # Automáticamente define a working directory para o local deste ficheiro .Rmd
@@ -170,6 +170,7 @@ significado.
 
 ```{r}
 # Informações (Descrição, citação e PubMed ID do artigo) presentes no ficheiro "meta_study.txt"
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 meta_study <- read.delim("blca_msk_tcga_2020\\meta_study.txt", sep = ":", 
                          header = FALSE, 
                          row.names = 1, 
@@ -933,7 +934,7 @@ cat("Precisão da RNA:", ann_accuracy, "\n")
 
 ```
 ## Declaração Justificativa:
-Apesar dos nossos esforços para completar este trabalho com sucesso não fomos bem sucedidos, dividimos os dados em treino e teste, padronizando-os, convertendo variáveis, treinando e avaliando modelos KNN e Naive Bayes, calculando métricas de desempenho, e trabalhando com árvores de decisão e regressão - obtivemos um loop de erros no processamento das variaveis para analise que nos impediu de prosseguir e originou novo atraso. Assim, consultámos trabalhos externos e colegas de outros grupos. Aproveitámos o código encontrado no repositório de Mariana Oliveira, Rui Sousa e Samuel Baptista, e com o seu consentimento, usamos para estruturar e concluir a parte de "Realização do Clustering hierárquico" e seguintes topicos, estão citados no código como comentario.
+Apesar dos nossos esforços para completar este trabalho com sucesso não fomos bem sucedidos, dividimos os dados em treino e teste, padronizando-os, convertendo variáveis, treinando e avaliando modelos KNN e Naive Bayes, calculando métricas de desempenho, e trabalhando com árvores de decisão e regressão - obtivemos um loop de erros no processamento das variaveis para analise que nos impediu de prosseguir e originou novo atraso. Assim, consultámos trabalhos externos e colegas de outros grupos. Aproveitámos o código encontrado no repositório de Mariana Oliveira, Rui Sousa e Samuel Baptista, e com o seu consentimento, usamos para estruturar e concluir a parte de "Realização do Clustering hierárquico" e seguintes tópicos, estão citados no código como comentário. Entretanto mais proximo da data de entrega novo erro surgiu levando a esta última versão deste trabalho...
 
 ### Bibliografia
 
