@@ -781,9 +781,13 @@ ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster)) +
 # Realização do Clustering hierárquico
 
 ```{r}
-# Função para plotar o dendrograma com labels
-my.plot.hc <- function(hclust, lab = 1:length(hclust$order), 
-                       lab.col = rep(1, length(hclust$order)), 
+# Loading das libraries
+library(ggplot2)
+library(stats)
+
+# Função para plotar o dendograma
+my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
+                       lab.col = rep(1, length(hclust$order)),
                        hang = 0.1, ...) {
   y <- rep(hclust$height, 2)
   x <- as.numeric(hclust$merge)
@@ -793,32 +797,46 @@ my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
   y <- y[order(x)]
   x <- x[order(x)]
   plot(hclust, labels = FALSE, hang = hang, ...)
-  text(x = x, y = y[hclust$order] - (max(hclust$height) * hang), 
-       labels = lab[hclust$order], col = lab.col[hclust$order], 
-       srt = 90, adj = c(1,0.5), xpd = NA, ...)
+  text(x = x, y = y[hclust$order] - (max(hclust$height) * hang),
+       labels = lab[hclust$order], col = lab.col[hclust$order],
+       srt = 90, adj = c(1, 0.5), xpd = NA, ...)
 }
+# Citação: Oliveira, M., Sousa, R., & Baptista, S. (2023). report.Rmd.
+# Extrair a matriz de expressão e os metadados
+expression_data <- as.data.frame(assay(data, "unstranded"))
+metadata <- colData(data)
 
-# Extrair os valores numéricos
-bladder_numeric <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem)
+# Remover valores ausentes e calcular a variância dos genes
+expression_data <- na.omit(expression_data)
+variances <- apply(expression_data, 1, var)
 
-# Redução de dimensionalidade com PCA - torna o processo mais eficiente
-pca_result <- prcomp(bladder_numeric, center = TRUE, scale. = TRUE)
-bladder_reduced <- pca_result$x[, 1:10]  # Utilizar o número adequado de PCs 
+# Selecionar apenas os genes com maior variância
+top_genes <- order(variances, decreasing = TRUE)[1:1000]
+expression_data <- expression_data[top_genes, ]
 
-# Calcular a matriz de distâncias
-dist_pca <- dist(bladder_reduced, method = "manhattan")
+# Transpor os dados e normalizar
+expression_data <- t(expression_data)
+expression_data <- scale(expression_data)
 
-# Clustering hierárquico com dados reduzidos
+# Reduce dimensionality with PCA
+pca_result <- prcomp(expression_data, center = TRUE, scale. = TRUE)
+reduced_data <- pca_result$x[, 1:10]  # Selecting the first 10 PCs
+
+# Calculate distance matrix
+dist_pca <- dist(reduced_data, method = "manhattan")
+
+# Hierarchical Clustering
 cl_pca <- hclust(dist_pca, method = "average")
 
-# Plotar o dendrograma
-my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
+# Plotar dendrograma
+my.plot.hc(cl_pca, lab.col = as.integer(metadata$ajcc_pathologic_stage) + 1, cex = 0.6)
+
 ```
 
 ## Machine Learning
 
 -Dividimos os dados em conjuntos de treino e teste com uma proporção de 70/30.
--Convertemos a variável categórica DFS_STATUS em fator apenas para os dados de treino.
+-Convertemos a variável categórica ajcc_pathologic_stage em fator apenas para os dados de treino.
 -Verificamos se existem valores ausentes nos dados.
 -Selecionamos as colunas relevantes nos dados de treinamento e teste.
 -Padronizamos os dados.
@@ -826,243 +844,96 @@ my.plot.hc(cl_pca, lab.col = as.integer(bladder$Muscle.loss) + 1, cex = 0.6)
 -Por fim avaliamos o modelo usando a matriz de confusão.
 
 ```{r}
-# Carregar o pacote caret
+# Carregar as bibliotecas necessárias
+library(ggplot2)
 library(caret)
-
-# Divisão em conjuntos de treino/teste com proporção de 70/30
-train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)  
-trainData <- bladder_clin[train_indices, ]
-testData <- bladder_clin[-train_indices, ]
-
-# Converter variável categórica em fator apenas para dados de treino
-trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
-
-# Verificar e tratar valores ausentes
-if (anyNA(trainData) || anyNA(testData)) {
-  cat("Os dados contêm valores NA. Trate os valores ausentes antes de prosseguir.")
-} else {
-  # Selecionar colunas relevantes
-  relevant_columns <- c("AGE", "AJCC_PATHOLOGIC_TUMOR_STAGE", "BUFFA_HYPOXIA_SCORE", 
-                        "ETHNICITY", "OS_MONTHS", "OS_STATUS", "PFS_MONTHS", "PFS_STATUS", 
-                        "RACE", "SEX", "TMB_NONSYNONYMOUS", "TUMOR_STAGE", "DFS_STATUS")
-
-  # Selecionar colunas relevantes nos dados de treinamento e teste
-  trainData <- trainData[, relevant_columns]
-  testData <- testData[, relevant_columns]
-
-  # Padronizar os dados
-  preProcValues <- preProcess(trainData, method = c("center", "scale"))
-  trainData <- predict(preProcValues, trainData)
-  testData <- predict(preProcValues, testData)
-
-  # Treinar o modelo KNN com validação cruzada
-  fitControl <- trainControl(method = "cv", number = 5)
-  model <- train(DFS_STATUS ~ ., data = trainData, method = "knn", trControl = fitControl, preProcess = c("center", "scale"))
-
-  # Avaliar o modelo
-  predictions <- predict(model, testData)
-  confusionMatrix(predictions, testData$DFS_STATUS)
-}
-
-```
--Definimos as funções para calcular o RMSE (Root Mean Squared Error) e o MAD (Mean Absolute Deviation).
--Preparamos os dados dividindo-os em conjuntos de treino e teste.
--Convertemos a variável de resposta DFS_STATUS em fator para ambos os conjuntos de dados.
--Extraimos o nome das variáveis preditoras.
--Normalizamos os dados de treino e teste.
--Realizamos a modelagem e avaliação com o algoritmo Naive Bayes.
--Extraimos as variáveis preditoras do conjunto de dados de teste.
--Garante que os níveis das variáveis categóricas no conjunto de dados de teste correspondem aos níveis no conjunto de dados de treino.
-
-```{r}
-# Carregar bibliotecas
-library(caret)
-library(party)
-library(e1071)
 library(naivebayes)
-library(rpart)
-
-# Função para calcular RMSE
-rmse <- function(pred, obs) {
-  sqrt(mean((pred - obs)^2))
-}
-
-# Função para calcular MAD
-mad <- function(pred, obs) {
-  mean(abs(pred - obs))
-}
-
-# Preparar os dados
-train_indices <- createDataPartition(bladder_clin$DFS_STATUS, p = 0.7, list = FALSE)
-trainData <- bladder_clin[train_indices, ]
-testData <- bladder_clin[-train_indices, ]
-
-# Converter a variável de resposta em fator
-trainData$DFS_STATUS <- as.factor(trainData$DFS_STATUS)
-testData$DFS_STATUS <- as.factor(testData$DFS_STATUS)
-
-# Extrair o nome da variável de resposta
-response_var <- "DFS_STATUS"
-
-# Extrair o nome das variáveis preditoras
-predictor_vars <- setdiff(names(trainData), response_var)
-
-# Normalizar os dados
-preProcValues <- preProcess(trainData[, predictor_vars], method = c("center", "scale"))
-trainData[, predictor_vars] <- predict(preProcValues, trainData[, predictor_vars])
-testData[, predictor_vars] <- predict(preProcValues, testData[, predictor_vars])
-
-# Renivelar variáveis "factor" no testData com base nos níveis nos dados de treino
-for (col in predictor_vars) {
-  if (is.factor(testData[[col]])) {
-    testData[[col]] <- factor(testData[[col]], levels = levels(trainData[[col]]))
-  }
-}
-
-# Modelagem e avaliação com Naive Bayes
-model_nb <- naivebayes::naive_bayes(DFS_STATUS ~ ., data = trainData, laplace = 1)
-
-# Extrair variáveis de predição do testData
-testData_subset <- testData[, predictor_vars]
-
-# Casar os níveis das variáveis "factor" do testData com os do trainData
-for (col in predictor_vars) {
-  if (is.factor(testData_subset[[col]]) && is.factor(trainData[[col]])) {
-    testData_subset[[col]] <- factor(testData_subset[[col]], levels = levels(trainData[[col]]))
-  }
-}
+library(ROSE)
+library(party)
 ```
-
--Para o Naive Bayes, o código realiza a previsão usando o modelo model_nb e calcula a tabela de confusão e a taxa de erro de classificação (PECC). No entanto obtemos um erro que nos impossibilita de avançar.
--Para as Árvores de Decisão, são criados dois modelos: um sem poda (blad_ctree) e outro com poda (tree2). A previsão é feita para ambos os modelos e, em seguida, são calculadas as tabelas de confusão e as taxas de erro de classificação (PECC).
--Para a Árvore de Regressão, o modelo é criado utilizando a variável AGE como variável de resposta. A previsão é feita e são calculados o RMSE e o MAD.
--Os resultados são apresentados em um dataframe (results) e são exibidos na tela, junto com os valores de RMSE e MAD para a Árvore de Regressão.
--Realizamos o plot das árvores de decisão e regressão.
+### Clustering de genes/amostras e redução de dimensionalidade
 ```{r}
-nb_pred <- predict(model_nb, newdata = testData_subset)
-t_nb <- table(nb_pred, testData$DFS_STATUS)
-pecc_nb <- 1 - sum(diag(t_nb)) / sum(t_nb)
+# Executar PCA
+pca_result <- prcomp(expression_data, center = TRUE, scale. = TRUE)
 
-# Modelagem e avaliação com Árvores de Decisão
-blad_ctree <- ctree(DFS_STATUS ~ ., data = trainData)
-testPred_ctree <- predict(blad_ctree, newdata = testData)
-t_ctree <- table(testPred_ctree, testData$DFS_STATUS)
-pecc_ctree <- 1 - sum(diag(t_ctree)) / sum(t_ctree)
+# Visualizar os componentes principais
+plot(pca_result, main = "PCA dos Dados de Expressão Gênica")
+```
+### Balanceamento e Modelagem
+Agora, aplicamos o balanceamento com ROSE e ajustamos o modelo Naive Bayes
+```{r}
+# Adicionar a variável de destino
+pca_data <- as.data.frame(pca_result$x[, 1:10])
+pca_data$ajcc_pathologic_stage <- metadata$ajcc_pathologic_stage
 
-# Podar a árvore de decisão
-tree1 <- tree(DFS_STATUS ~ ., data = trainData)
-tree2 <- prune.tree(tree1, best = 3)
-testPred_tree2 <- predict(tree2, newdata = testData, type = "class")
-t_tree2 <- table(testPred_tree2, testData$DFS_STATUS)
-pecc_tree2 <- 1 - sum(diag(t_tree2)) / sum(t_tree2)
+# Filtrar para manter apenas duas classes da variável de destino
+target_classes <- c("Stage I", "Stage II")
+pca_data <- pca_data[pca_data$ajcc_pathologic_stage %in% target_classes, ]
+pca_data$ajcc_pathologic_stage <- factor(pca_data$ajcc_pathologic_stage)
 
-# Modelagem e avaliação com Árvore de Regressão usando rpart
-arvreg <- rpart(AGE ~ ., data = trainData)
-testPred_arvreg <- predict(arvreg, newdata = testData)
-rmse_arvreg <- rmse(testPred_arvreg, testData$AGE)
-mad_arvreg <- mad(testPred_arvreg, testData$AGE)
+# Balancear os dados com ROSE
+balanced_data <- ROSE(ajcc_pathologic_stage ~ ., data = pca_data, seed = 42)$data
 
-# Apresentação dos resultados
-results <- data.frame(
-  Model = c("Naive Bayes", "Árvore de Decisão", "Árvore Podada"),
-  PECC = c(pecc_nb, pecc_ctree, pecc_tree2)
-)
-print(results)
-cat("RMSE para Árvore de Regressão:", rmse_arvreg, "\n")
-cat("MAD para Árvore de Regressão:", mad_arvreg, "\n")
+# Treinar o modelo Naive Bayes com dados balanceados
+model_nb <- naivebayes::naive_bayes(ajcc_pathologic_stage ~ ., data = balanced_data, laplace = 1)
 
-# Plotar a árvore de decisão e a árvore de regressão
-par(mfrow = c(1, 2))
-plot(tree2)
-text(tree2)
-plot(arvreg)
-text(arvreg)
+# Fazer previsões nos dados de teste
+nb_pred <- predict(model_nb, newdata = pca_data)
+
+# Converter as previsões para fator com os mesmos níveis
+nb_pred <- factor(nb_pred, levels = levels(pca_data$ajcc_pathologic_stage))
+
+# Avaliar o modelo
+conf_matrix <- caret::confusionMatrix(nb_pred, pca_data$ajcc_pathologic_stage)
+print(conf_matrix)
+
 ```
 
 ```{r}
-# if (!require("BiocManager", quietly = TRUE))
-#     install.packages("BiocManager")
-# 
-# BiocManager::install("MLInterfaces")
-
-library(class)
-library(nnet)
-library(rpart)
-library(MLInterfaces)
-library(genefilter)
+# Carregar bibliotecas necessárias
 library(caret)
+library(e1071)
+library(nnet)
 
+# Selecionar características bioinformaticamente significativas
+selected_features <- c("age_at_diagnosis", "tumor_grade", "primary_diagnosis",
+                       "ajcc_pathologic_t", "ajcc_pathologic_n", "ajcc_pathologic_stage")
 
-# Função para treinar e avaliar o modelo k-NN
-train_eval_knn_model <- function(train, test, target_train, target_test, k = 1) {
-  valores.previstos = knn(train, test, target_train, k)
-  accuracy = sum(valores.previstos == target_test) / length(target_test)
-  return(list(pred = valores.previstos, accuracy = accuracy))
-}
+# Limpar metadados removendo linhas com destino em falta e selecionando colunas relevantes
+metadata_clean <- metadata[complete.cases(metadata$ajcc_pathologic_stage), selected_features, drop = FALSE]
 
-# Função para treinar e avaliar o modelo ANN
-train_eval_ann_model <- function(train, test, target_train, target_test, size = 3) {
-  ann_model = nnet(target_train ~ ., data = as.data.frame(train), size = size)
-  valores.prev.ann = predict(ann_model, newdata = as.data.frame(test), type = "class")
-  accuracy = sum(valores.prev.ann == target_test) / length(target_test)
-  return(list(pred = valores.prev.ann, accuracy = accuracy))
-}
+# Converter destino em fator
+metadata_clean$ajcc_pathologic_stage <- as.factor(metadata_clean$ajcc_pathologic_stage)
 
-# Função para treinar e avaliar o modelo Árvore de Decisão
-train_eval_decision_tree_model <- function(train, test, target_train, target_test) {
-  arv_model = rpart(target_train ~ ., data = as.data.frame(train))
-  classes.previstas_arv = predict(arv_model, newdata = as.data.frame(test), type = "class")
-  accuracy = sum(classes.previstas_arv == target_test) / length(target_test)
-  return(list(pred = classes.previstas_arv, accuracy = accuracy))
-}
+# Divisão de Treino-Teste
+set.seed(123)
+train_indices <- createDataPartition(metadata_clean$ajcc_pathologic_stage, p = 0.7, list = FALSE)
+trainData <- metadata_clean[train_indices, ]
+testData <- metadata_clean[-train_indices, ]
 
-# Função para treinar e avaliar o modelo usando MLInterfaces
-train_eval_ml_model <- function(train, target_train) {
-  knnResult = MLearn(target_train ~ ., train, knnI(k = 1), 1:ncol(train))
-  return(confuMat(knnResult))
-}
+# Normalização dos dados (excluindo a variável de destino)
+preProcValues <- preProcess(trainData[, -which(names(trainData) == "ajcc_pathologic_stage")], method = c("center", "scale"))
 
-# Extrai a matrix de expressão do dataframe
-expr_matrix <- as.matrix(dados_mrna_df)
+trainData <- predict(preProcValues, trainData)
+testData <- predict(preProcValues, testData)
 
-# Dividir os dados em treino e teste
-train_indices <- sample(1:nrow(dados_mrna_df), 60)
-train <- expr_matrix[train_indices, ]
-test <- expr_matrix[-train_indices, ]
-target_train <- bladder_clin$DFS_STATUS[train_indices]
-target_test <- bladder_clin$DFS_STATUS[-train_indices]
+# Modelo k-NN
+fitControl <- trainControl(method = "cv", number = 5)
+knn_model <- train(ajcc_pathologic_stage ~ ., data = trainData, method = "knn", trControl = fitControl)
+knn_predictions <- predict(knn_model, testData)
+knn_conf_matrix <- confusionMatrix(knn_predictions, testData$ajcc_pathologic_stage)
+print(knn_conf_matrix)
 
-###############
-# Variável target_train tem valores NA, vamos corrigir isso:
-# Converter target_train de factor para character
-target_train <- as.character(target_train)
+# Modelo de Rede Neural Artificial
+ann_model <- nnet(ajcc_pathologic_stage ~ ., data = as.data.frame(trainData), size = 3)
+ann_predictions <- predict(ann_model, newdata = as.data.frame(testData), type = "class")
+ann_accuracy <- sum(ann_predictions == testData$ajcc_pathologic_stage) / length(testData$ajcc_pathologic_stage)
+cat("Precisão da RNA:", ann_accuracy, "\n")
 
-# Substituição de valores NA com o mode
-mode_target_train <- names(sort(-table(target_train)))[1]
-target_train[is.na(target_train)] <- mode_target_train
-
-# Retornar target_train para factor
-target_train <- as.factor(target_train) 
-
-###############
-
-# Converter target_test para factor
-target_test <- as.factor(target_test)
-
-# Treinar e avaliar o modelo k-NN
-knn_result <- train_eval_knn_model(train, test, target_train, target_test, k = 1)
-
-# Treinar e avaliar o modelo ANN
-ann_result <- train_eval_ann_model(train, test, target_train, target_test, size = 3)
-
-# Treinar e avaliar o modelo Árvore de Decisão
-decision_tree_result <- train_eval_decision_tree_model(train, test, target_train, target_test)
-
-# Treinar e avaliar o modelo usando MLInterfaces
-ml_model_result <- train_eval_ml_model(train, target_train)
 
 ```
-
+## Declaração Justificativa:
+Apesar dos nossos esforços para completar este trabalho com sucesso não fomos bem sucedidos, dividimos os dados em treino e teste, padronizando-os, convertendo variáveis, treinando e avaliando modelos KNN e Naive Bayes, calculando métricas de desempenho, e trabalhando com árvores de decisão e regressão - obtivemos um loop de erros no processamento das variaveis para analise que nos impediu de prosseguir e originou novo atraso. Assim, consultámos trabalhos externos e colegas de outros grupos. Aproveitámos o código encontrado no repositório de Mariana Oliveira, Rui Sousa e Samuel Baptista, e com o seu consentimento, usamos para estruturar e concluir a parte de "Realização do Clustering hierárquico" e seguintes topicos, estão citados no código como comentario.
 
 ### Bibliografia
 
@@ -1074,5 +945,7 @@ Dyrskjøt, L., Hansel, D. E., Efstathiou, J. A., Knowles, M. A., Galsky,
 M. D., Teoh, J., & Theodorescu, D. (2023). Bladder cancer. Nature
 Reviews. Disease Primers, 9(1).
 <https://doi.org/10.1038/S41572-023-00468-9>
+
+Oliveira, M., Sousa, R., & Baptista, S. (2023). report.Rmd. Recuperado de https://github.com/mariana-olivetree/Extracao/blob/main/report.Rmd
 
 \`\`\`{r}
