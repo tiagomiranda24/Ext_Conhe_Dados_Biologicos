@@ -1,0 +1,932 @@
+---
+title: "Projeto de Análise de Neoplasia da Bexiga"
+author: "Christian Neitzel, Diana Silva, Diogo Esteves, Tiago Miranda"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document: default
+  word_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introdução
+
+Este projeto foi desenvolvido no âmbito da UC "Extração de Conhecimento
+de Dados Biológicos (2023/24)" do Mestrado em Bioinformática da Escola
+de Engenharia da Universidade do Minho. O objetivo central é analisar um
+conjunto de dados relacionados ao Carcinoma da Bexiga, acessados através
+do cBioPortal, utilizando ferramentas como R e pacotes do cBioportal
+Bioconductor. O projeto será dividido em x fases principais.
+
+**Contextualização**
+
+A neoplasia da bexiga representa um desafio global de saúde, sendo uma
+das formas de cancro mais prevalentes em todo o mundo. Embora a
+abordagem clínica tenha permanecido largamente inalterada ao longo dos
+anos, descobertas recentes têm aberto caminho para uma nova era no
+diagnóstico e gestão da doença (Dyrskjøt et al., 2023). A mortalidade
+específica começou a diminuir em regiões com maior consciencialização
+social dos fatores de risco e redução da exposição a agentes
+carcinogénicos. A remoção cirurgica radical da bexiga continua a ser o
+padrão-ouro para casos invasivos, enquanto o valor clínico da
+linfadenectomia e alternativas à quimioterapia perioperatória estão a
+ser desafiados. Paralelamente, avanços na biologia molecular e na
+compreensão da tumorigénese estão a abrir caminho para uma medicina
+personalizada. A detecção precoce é crucial para um melhor prognóstico,
+e métodos minimamente invasivos de diagnóstico são essenciais (Dobruch &
+Oszczudłowski, 2021).
+
+**Análise Demonstrativa de Expressão Genética Diferencial**
+
+Este trabalho contém uma análise demonstrativa de expressão genética
+diferencial, utilizando amostras de sequenciamento direcionado presentes
+no estudo "Genomic Differences Between "Primary" and "Secondary"
+Muscle-invasive Bladder Cancer as a Basis for Disparate Outcomes to
+Cisplatin-based Neoadjuvant Chemotherapy"
+(<https://www.cbioportal.org/study/summary?id=blca_msk_tcga_2020>).
+Neste estudo os investigadores tiveram como objetivo, investigar as
+diferenças genômicas entre o carcinoma de bexiga músculo-invasivo
+"primário" e "secundário" e como estas diferenças afetam a resposta à
+quimioterapia neoadjuvante à base de cisplatina. Os autores analisaram
+dados genômicos de pacientes com carcinoma de bexiga
+músculo-invasivo tratados com quimioterapia neoadjuvante à base de
+cisplatina. Os pacientes foram divididos em dois grupos: aqueles com
+carcinoma de bexiga "primário" (sem tratamento prévio) e aqueles com
+carcinoma de bexiga "secundário" (já tratado com quimioterapia ou
+radiação).
+
+## Fase 1: Exploração e Análise de Dados
+
+A primeira fase compreenderá as seguintes etapas: explicação da origem e
+relevância dos dados; realização de tarefas de preparação e
+pré-processamento dos dados; resumo dos dados através de estatísticas
+descritivas e exploração visual por meio de gráficos; realização de
+análises estatísticas univariadas; e por fim, análise de expressão
+diferencial e de enriquecimento.
+
+#### Instalação e importação de packages
+
+Nesta secção, são destacados todos os pacotes utilizados no trabalho,
+que facilitam a aquisição e análise de dados ao longo do documento,
+tornando mais eficiente a obtenção e compreensão das informações
+relevantes. Em primeiro lugar, procedemos à instalação dos pacotes
+necessários para realizar a análise da expressão diferencial. Isso
+garante que todas as ferramentas estejam disponíveis para conduzir as
+análises de forma adequada e precisa.
+
+```{r, include=FALSE}
+# Instalação dos pacotes necessários
+
+### Só é necessário correr este código se os pacotes ainda não foram instalados ou se estão desatualizados! Caso já estejam, podem saltar para o carregamento dos pacotes! ###
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install(c("cBioPortalData", "edgeR", "limma", "Glimma", "gplots", "org.Mm.eg.db", "org.Hs.eg.db", "TCGAbiolinks", "DESeq2", "clusterProfiler", "EnhancedVolcano", "MLInterfaces"), ask = FALSE)
+
+
+if (!requireNamespace("GGally", quietly = TRUE))
+  install.packages("GGally", dependencies = TRUE, repos = "https://CRAN.R-project.org/")
+
+if (!requireNamespace("rentrez", quietly = TRUE))
+  install.packages("rentrez")
+
+if (!requireNamespace("umap", quietly = TRUE))
+  install.packages("umap")
+
+if (!requireNamespace("ROSE", quietly = TRUE))
+  install.packages("ROSE")
+
+if (!requireNamespace("naivebayes", quietly = TRUE))
+  install.packages("naivebayes")
+
+```
+
+```{r, include=FALSE}
+
+# Carregamento dos pacotes
+
+library(cBioPortalData)
+library(edgeR)
+library(limma)
+library(DESeq2)
+library(GGally)
+library(dplyr)
+library(tibble)
+library(TCGAbiolinks)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(EnhancedVolcano)
+library(pheatmap)
+library(rentrez)
+library(caret)
+library(stats)
+library(cluster)
+library(umap)
+library(ROSE)
+
+```
+
+# Exploração dos dados presentes no dataset
+
+Nesta fase é realizado o carregamento dos dados clinicos do estudo,
+explorados os ensaios do estudo disponiveis e organizados em dataframes:
+
+```{r}
+## Inicialização do API cBioPortal e obtenção dos dados do estudo "blca_msk_tcga_2020"
+
+# Automaticamente define a working directory para o local deste ficheiro .Rmd
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+# Inicialização da API do cBioPortal
+cbio <- cBioPortal()
+
+# Obter dados clínicos
+bladder_clin <- clinicalData(api = cbio, studyId = "blca_msk_tcga_2020")
+dim(bladder_clin)  # Deve retornar 476 linhas e 42 colunas
+
+# Carrega os dados do cBioPortal
+bladder = cBioDataPack("blca_msk_tcga_2020", ask = FALSE)
+
+# Lista os nomes dos ensaios disponíveis no pacote dos dados do CBioPortal
+names(assays(bladder))
+names(colData(bladder)) # tipos de metadados associados a cada amostra
+
+# Summary dos dados
+summary(bladder)
+```
+
+# Extração dos Metadados
+
+A extração dos metadados é um processo vital na organização e
+compreensão de conjuntos de dados. Os metadados fornecem informações
+essenciais sobre os dados, incluindo sua origem, estrutura, formato e
+significado.
+
+```{r}
+# Informações (Descrição, citação e PubMed ID do artigo) presentes no ficheiro "meta_study.txt"
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+meta_study <- read.delim("blca_msk_tcga_2020\\meta_study.txt", sep = ":", 
+                         header = FALSE, 
+                         row.names = 1, 
+                         col.names = c("", "data")
+                         )
+
+meta_study$data <- trimws(meta_study$data) # Remove leading spaces na coluna "data"
+
+meta_study["description", "data"] # Descrição
+meta_study["citation", "data"]    # Citação
+meta_study["pmid", "data"]        # pmid (PubMed ID), permite encontrar o artigo da qual originaram os dados
+
+# Função para obter o número DOI do artigo a partir do PubMed ID
+get_doi_blca <- function(pubmed_id) {
+  record <- entrez_fetch(db = "pubmed", id = pubmed_id, rettype = "abstract")
+  doi_blca <- sub(".*doi: (10\\.\\d+/[^ \\n\\\"]*).*", "doi: \\1", record)
+  doi_blca <- gsub("\\.$", "", doi_blca)
+  return(doi_blca)
+}
+
+# Obter o número DOI
+pubmed_id <- meta_study["pmid", "data"]
+doi_blca <- get_doi_blca(pubmed_id)
+print(doi_blca)
+
+```
+
+```{r}
+# Consulta dos dados de mrna e conversão em dataframe.
+min_max_scaling <- function(x) {
+  if(all(is.na(x)) || length(unique(na.omit(x))) == 1) {
+    return(rep(0, length(x)))  # Retorna zeros se os valores forem NA ou iguais
+  }
+  min_val <- min(x, na.rm = TRUE)
+  max_val <- max(x, na.rm = TRUE)
+  return((x - min_val) / (max_val - min_val))
+}
+
+# sem o min e max scaling nesta parte ocorre erro no mutate que se segue:
+
+dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+```
+
+Verificamos se as colunas apresentavam valores de NAs
+
+Durante o processo de análise de dados, é comum realizar ajustes na
+estrutura do conjunto de dados para melhorar sua organização e
+compreensão. Uma etapa essencial é a verificação da existencia de valores
+ausentes (NAs) nas colunas. Os NAs podem ocorrer por diversos
+motivos, como erros de medição ou falhas na coleta de dados, sendo
+fundamental identificá-los para decidir como tratá-los adequadamente
+durante a análise.
+
+Portanto, após esta etápa, é recomendável realizar uma verificação minuciosa 
+para garantir a integridade dos dados e prepará-los para análises posteriores. 
+Isso contribui para a confiabilidade e qualidade dos resultados obtidos a partir 
+do conjunto de dados.
+
+```{r}
+unlist(lapply(bladder_clin, class))  # Verifica as classes das colunas do conjunto de dados
+unlist(lapply(bladder_clin, typeof)) # Verifica os tipos das colunas do conjunto de dados
+```
+
+```{r}
+# # Estudando as colunas, verifica-se que as colunas "SAMPLE_COUNT", "CANCER_TYPE", "CANCER_TYPE_DETAILED", "ONCOTREE_CODE" e "SOMATIC_STATUS" têm sempre 1 único valor cada, logo serão removidas.
+# bladder_clin <- subset(bladder_clin, select = -c(SAMPLE_COUNT, CANCER_TYPE, CANCER_TYPE_DETAILED, ONCOTREE_CODE, SOMATIC_STATUS))
+
+# Conversão de colunas que possuem valores numéricos (no entanto não são) para serem numéricas
+# Definir as variáveis como numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(
+    RAGNUM_HYPOXIA_SCORE = as.numeric(RAGNUM_HYPOXIA_SCORE),
+    WINTER_HYPOXIA_SCORE = as.numeric(WINTER_HYPOXIA_SCORE),
+    DFS_MONTHS = as.numeric(DFS_MONTHS),
+    ANEUPLOIDY_SCORE = as.numeric(ANEUPLOIDY_SCORE),
+    FRACTION_GENOME_ALTERED = as.numeric(FRACTION_GENOME_ALTERED),
+    MSI_SCORE_MANTIS = as.numeric(MSI_SCORE_MANTIS),
+    MSI_SENSOR_SCORE = as.numeric(MSI_SENSOR_SCORE),
+    MUTATION_COUNT = as.numeric(MUTATION_COUNT),
+    TMB_NONSYNONYMOUS = as.numeric(TMB_NONSYNONYMOUS),
+    AGE = as.numeric(AGE),
+    BUFFA_HYPOXIA_SCORE = as.numeric(BUFFA_HYPOXIA_SCORE),
+    OS_MONTHS = as.numeric(OS_MONTHS),
+    PFS_MONTHS = as.numeric(PFS_MONTHS)
+  )
+
+# Vamos substituir os NAs das colunas numéricas pela mediana de cada coluna e os NAs das não numéricas por "Unknown". Define-se primeiro as colunas numéricas para conseguirmos correr o nosso código de substituição dos NAs.
+
+# Substituição dos NAs
+na_columns <- sapply(bladder_clin, function(x) any(is.na(x)))
+
+for (col_name in names(bladder_clin)) {
+  if (na_columns[col_name]) {
+    if (is.numeric(bladder_clin[[col_name]])) {
+      median_val <- median(bladder_clin[[col_name]], na.rm = TRUE)
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- median_val
+    } else {
+      bladder_clin[[col_name]][is.na(bladder_clin[[col_name]])] <- "Unknown"
+    }
+  }
+}
+
+# Tendo os NAs substituidos, podemos agora definir variáveis como fatores:
+
+# Definir as variáveis como fatores
+bladder_clin <- bladder_clin %>%
+  mutate(
+    PFS_STATUS = as.factor(PFS_STATUS),
+    PRIOR_DX = as.factor(PRIOR_DX),
+    RADIATION_THERAPY = as.factor(RADIATION_THERAPY),
+    SEX = as.factor(SEX),
+    DFS_STATUS = as.factor(DFS_STATUS),
+    sampleId = as.factor(sampleId),
+    ANALYSIS_COHORT = as.factor(ANALYSIS_COHORT),
+    DISTANT_METS = as.factor(DISTANT_METS),
+    GRADE = as.factor(GRADE),
+    LYMPH_NODE_STATUS = as.factor(LYMPH_NODE_STATUS),
+    PRIMARY_VS_SECONDARY = as.factor(PRIMARY_VS_SECONDARY),
+    PRIOR_INTRAVESICAL_CHEMOTHERAPY = as.factor(PRIOR_INTRAVESICAL_CHEMOTHERAPY),
+    SAMPLE_TYPE = as.factor(SAMPLE_TYPE),
+    TUMOR_STAGE = as.factor(TUMOR_STAGE),
+    AJCC_PATHOLOGIC_TUMOR_STAGE = as.factor(AJCC_PATHOLOGIC_TUMOR_STAGE),
+    COHORT = as.factor(COHORT),
+    ETHNICITY = as.factor(ETHNICITY),
+    OS_STATUS = as.factor(OS_STATUS),
+    PATH_M_STAGE = as.factor(PATH_M_STAGE),
+    PATH_N_STAGE = as.factor(PATH_N_STAGE),
+    PATH_T_STAGE = as.factor(PATH_T_STAGE),
+    RACE = as.factor(RACE)
+  )
+
+# Verificar se ainda há valores NA
+summary(bladder_clin)
+
+# Para saber se a substituição dos NAs ocorreu, verifica os resultados do "summary(bladder_clin)", se ainda aparecerem "NA's", algo está mal, se não houverem "NA's" nas colunas numéricas e houverem valores "Unknown" nas colunas não numéricas, está tudo certo!
+
+```
+
+# Pie Charts (Gráficos de Pizza)
+
+```{r}
+### Pie Charts
+## Código para fazer o plot pie chart de CADA UMA das colunas categóricas
+
+# Definição dos títulos de cada piechart
+plot_titles <- c(
+  "Overall Survival Status",                # OS_STATUS
+  "Sex",                                    # SEX
+  "Ethnicity Category",                     # ETHNICITY
+  "Race Category",                          # RACE
+  "AJCC Metastasis Stage Code",             # PATH_M_STAGE
+  "AJCC Neoplasm Disease Lymph Node Stage", # PATH_N_STAGE
+  "AJCC Neoplasm Disease Stage",            # AJCC_PATHOLOGIC_TUMOR_STAGE
+  "AJCC Tumor Stage",                       # PATH_T_STAGE
+  "Analysis Cohort"                         # ANALYSIS_COHORT
+)
+
+# Definição das frequências e das frequências relativas
+freq_list <- list(
+  OS_STATUS = prop.table(table(bladder_clin$OS_STATUS)),
+  SEX = prop.table(table(bladder_clin$SEX)),
+  ETHNICITY = prop.table(table(bladder_clin$ETHNICITY)),
+  RACE = prop.table(table(bladder_clin$RACE)),
+  PATH_M_STAGE = prop.table(table(bladder_clin$PATH_M_STAGE)), 
+  PATH_N_STAGE = prop.table(table(bladder_clin$PATH_N_STAGE)), 
+  AJCC_PATHOLOGIC_TUMOR_STAGE = prop.table(table(bladder_clin$AJCC_PATHOLOGIC_TUMOR_STAGE)), 
+  PATH_T_STAGE = prop.table(table(bladder_clin$PATH_T_STAGE)), 
+  ANALYSIS_COHORT = prop.table(table(bladder_clin$ANALYSIS_COHORT))
+)
+
+# Criação de um dataframe com as frequências e os nomes das colunas
+pie_data <- lapply(freq_list, function(freq_rel) {
+  data.frame(labels = names(freq_rel), values = as.numeric(freq_rel))
+})
+
+# Criação dos pie charts
+for (i in seq_along(plot_titles)) {
+  plot_pies <- ggplot(pie_data[[i]], aes(x = "", y = values, fill = labels)) +
+    geom_bar(stat = "identity", width = 1) +
+    geom_text(aes(label = paste(round(freq_list[[i]] * 100, 2), "%")), position = position_stack(vjust = 0.5)) +
+    coord_polar("y", start = 0) + 
+    labs(title = plot_titles[i], fill = "") +
+    theme_void() +
+    theme(
+      legend.position = "left",
+      plot.title = element_text(hjust = 0.5), 
+      plot.margin = margin(1)
+    )
+  
+  print(plot_pies)
+}
+```
+
+# Barplots (Gráficos de Barras)
+
+```{r}
+# Função para criar os barplots através de iterações
+create_barplot <- function(data, column_name, breaks, title) {
+  table_data <- table(cut(data[[column_name]], breaks = breaks, include.lowest = TRUE))
+  
+  if (length(table_data) > length(breaks)) {
+    table_data[length(table_data)] <- table_data[length(table_data)] + sum(data[[column_name]] > breaks[length(breaks)])
+  }
+  
+  # Conversão para dataframe
+  df <- data.frame(interval = names(table_data), count = as.numeric(table_data))
+  df$interval <- factor(df$interval, levels = unique(df$interval))
+  
+  # Barplot geral
+  plot_bar <- ggplot(df, aes(x = interval, y = count)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    labs(title = title,
+         x = "",
+         y = "Frequência relativa") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(hjust = 0.5))
+  
+  return(plot_bar)
+}
+
+create_barplot(bladder_clin, "MUTATION_COUNT", c(0, seq(50, 500, by = 50), Inf), "Mutation Count")
+create_barplot(bladder_clin, "FRACTION_GENOME_ALTERED", c(0, seq(0.05, 0.85, by = 0.05), Inf), "Fraction Genome Altered")
+create_barplot(bladder_clin, "AGE", unique(c(0, seq(40, max(bladder_clin$AGE), by = 5), max(bladder_clin$AGE))), "Diagnosis Age")
+create_barplot(bladder_clin, "MSI_SCORE_MANTIS", c(min(bladder_clin$MSI_SCORE_MANTIS), seq(0, 1, by = 0.1), Inf), "MSI MANTIS Score")
+create_barplot(bladder_clin, "MSI_SENSOR_SCORE", c(-Inf, 4, 10, Inf), "MSI SENSOR Score")
+create_barplot(bladder_clin, "ANEUPLOIDY_SCORE", c(seq(0, max(bladder_clin$ANEUPLOIDY_SCORE), by = 2)), "Aneuploidy Score")
+create_barplot(bladder_clin, "BUFFA_HYPOXIA_SCORE", c(-Inf, seq(-35, 45, by = 5), Inf), "Buffa Hypoxia Score")
+
+```
+# Pairplots
+
+```{r}
+### Aqui vamos observar os estados, distribuições e correlações dos nossos dados, incluindo entender o que podemos fazer para normalização dos dados. ###
+
+# Pairplot PRE-NOMALIZAÇÃO para ver os gráficos das correlações possíveis entre colunas
+# Subconjunto do conjunto de dados para apenas incluir as colunas numéricas
+numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
+
+# Criação de um pairplot com só as colunas numéricas para verificar as correlações
+pairplot1 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+                            upper = list(continuous = wrap("cor", size = 2, color = "brown")),
+                            lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
+  theme(text = element_text(size = 4),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 4),
+        panel.spacing = unit(0.1, "lines")) # Ajusta espaços entre os gráficos/painéis
+
+pairplot1 # Pairplot PRE-NORMALIZAÇÃO
+
+ggsave("pairplot1.png", pairplot1, width = 10, height = 6) # Guarda o pairplot como uma imagem .png no working directory. Os parâmetros "width" e "height" definem o tamanho dele, caso queiram ver o pairplot, ele está disponível na mesma pasta que este ficheiro .Rmd!
+```
+
+
+## Normalização dos dados
+
+```{r pressure, echo=FALSE}
+### Se corrermos este código antes de definir as variáveis numéricas, o tratamento dos NA's não ocorre! ###
+
+# Vamos fazer a normalização dos dados fazendo primeiro a logaritmização dos dados e depois aplicar o Min-Max Scaling para os valores dos nossos dados serem positivos.
+
+# Colunas numéricas que vão ser normalizadas
+cols_norm <- c("RAGNUM_HYPOXIA_SCORE", "WINTER_HYPOXIA_SCORE", "DFS_MONTHS",
+                    "FRACTION_GENOME_ALTERED", "MSI_SCORE_MANTIS",
+                    "MSI_SENSOR_SCORE", "MUTATION_COUNT", "TMB_NONSYNONYMOUS",
+                    "OS_MONTHS", "PFS_MONTHS")
+
+
+# Logaritmização das colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(all_of(cols_norm), ~ if(all(. >= 0)) log(. + 1) else .)) # RStudio presume que os parêntesis estão errados apesar de estarem bem, isto deve-se ao comando "if". Se metermos "if_else", o "erro" desaparece mas consequentemente obtêm-se erros nas transformações, logo mantém-se assim até arranjarmos uma nova solução...
+
+# Aplicação do Min-Max Scaling (definido anteriormente) às colunas numéricas
+bladder_clin <- bladder_clin %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+
+# Aplicada a logaritmização e min-max scaling aos dados mRNA
+dados_mrna_df <- as.data.frame(assays(bladder)$mrna_seq_v2_rsem) %>%
+  mutate(across(where(is.numeric), min_max_scaling))
+```
+
+
+## Visualização geral da Normalização dos dados
+
+```{r}
+# Vamos voltar a fazer o pairplot depois de termos feito a normalização dos dados...
+# As colunas resultantes neste pairplot foram transformadas!
+
+# Pairplot PÓS-NOMARLIZAÇÃO (repetição do código do pairplot1, mas definido como "pairplot2" para fazermos comparações)
+numeric_data <- bladder_clin[, sapply(bladder_clin, is.numeric)]
+
+pairplot2 <- GGally::ggpairs(numeric_data, cardinality_threshold = Inf, 
+                            upper = list(continuous = wrap("cor", size = 2, color = "brown")),
+                            lower = list(continuous = wrap("points", size = 0.25, color = "dodgerblue3"))) +
+  theme(text = element_text(size = 4),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 4),
+        panel.spacing = unit(0.1, "lines"))
+
+pairplot2 # Pairplot PÓS-NORMALIZAÇÃO
+
+ggsave("pairplot2.png", pairplot2, width = 10, height = 6)
+
+```
+
+## Análise de Expressão Diferencial
+
+Para este passo é necessário pesquisar e Baixar Dados de Expressão
+Genética do TCGA-ACC
+
+```{r}
+# # Ver que projetos estão disponíveis
+# gdcprojects <- getGDCprojects()
+
+# Define o projeto
+project <- "TCGA-ACC"
+
+# Sumário dos ficheiros presentes no projeto
+getProjectSummary(project)
+
+# Configura a consulta com o tipo de amostra correto
+query <- GDCquery(project = project,
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification",
+                  workflow.type = "STAR - Counts",
+                  sample.type = "Primary Tumor")
+
+# # Ver que ficheiros temos no projeto
+# output_query <- getResults(query)
+
+# Baixa os dados
+GDCdownload(query)
+
+# Prepara os dados para análise
+data <- GDCprepare(query)
+
+## Mencionando aqui caso haja problemas com o GDCdownload() e o GDCprepare(), se está a utilizar Windows, certifique-se que o 'working directory' deste trabalho encontra-se numa diretoria de tamanho INFERIOR A 60 CARACTERES! Isto porque o GDCdownload vai criar as pastas onde os ficheiros .tsv vão ficar, se a 'working directory' tiver mais de 60 caracteres, a diretoria resultante de CADA UM DESTES FICHEIROS vai ter mais de 260 caracteres de comprimento, excedendo o limite path/filename do Windows!!! Fonte: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/153#issuecomment-1380580924
+```
+
+O próximo comando lista tanto dos dados clínicos colData(data) quanto
+dos dados de expressão rowData(data) para futuras analises:
+
+```{r}
+# colData(data) 
+# rowData(data)
+# names(assays(data))
+```
+
+```{r}
+# Análise de Expressão Diferencial:
+
+library(DESeq2)
+
+# Usando o ensaio identificado como "unstranded"
+dds <- DESeqDataSetFromMatrix(countData = assay(data, "unstranded"),
+                              colData = colData(data),
+                              design = ~ gender)  # Ou outra variável de interesse
+
+dds <- DESeq(dds)
+res <- results(dds)
+summary(res)
+
+```
+
+#### Interpretação dos Resultados
+
+Total de Genes Analisados: 52,766 genes com contagem total de leituras
+não zero.
+
+Genes Significativamente Regulados: 1.371 genes mostraram mudança
+significativa de expressão ao nível de ajuste de p-valor \< 0.1.
+
+Genes Regulados para Cima: 607 genes (1.2% do total analisado).
+
+Genes Regulados para Baixo: 776 genes (1.5% do total analisado).
+
+Filtros de Contagem Baixa: 23,356 genes (44% do total) tiveram contagens
+médias inferiores a 1, o que indica baixa expressão geral nesses genes,
+impactando a precisão das estimativas de dispersão e consequentemente
+dos testes.
+
+```{r}
+## Visualização dos Resultados:
+
+# Volcano Plot 
+EnhancedVolcano(res,
+                lab = rownames(res),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano plot',
+                pCutoff = 0.1,
+                FCcutoff = 0.5,
+                labSize = 3,        # Tamanho das labels dos pontos no gráfico
+                xlim = c(-10, 15))  # Limites nos eixos x
+
+
+# Volcano Plot ampliado (Nota: certos resultados estão a ser excluídas neste gráfico!)
+EnhancedVolcano(res,
+                lab = rownames(res),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano plot',
+                pCutoff = 0.1,
+                FCcutoff = 0.5,
+                labSize = 3,        # Tamanho das labels dos pontos no gráfico
+                xlim = c(-5, 5),    # Limites no eixo x
+                ylim = c(0, 10))    # Limites no eixo y
+
+```
+
+```{r}
+# Heatmaps
+
+topVarGenes <- head(order(rowVars(assay(dds)), decreasing = TRUE), 100)
+mat <- assay(dds)[topVarGenes, ]
+pheatmap(log2(mat + 1), scale = "row", clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean")
+
+```
+
+## Análise de Enriquecimento
+
+Análise de Enriquecimento Funcional
+para realizar análise de enriquecimento para os genes regulados para cima e para baixo separadamente
+
+```{r}
+# Verificar tipos de chaves disponíveis em org.Hs.eg.db
+keytypes(org.Hs.eg.db)
+
+# Verificar alguns dos identificadores atuais
+#head(gene_list_up)
+
+# Identificar genes up-regulated (ajuste aqui conforme o seu critério, por exemplo, p-valor ajustado < 0.05 e log2FoldChange > log2(1.5))
+gene_list_up <- rownames(res)[which(res$padj < 0.05 & res$log2FoldChange > log2(1.5))]
+
+# Verificar alguns dos identificadores atuais após identificar genes up-regulated
+head(gene_list_up)
+
+# Remover as versões dos Ensembl IDs
+gene_list_up_simplified <- gsub("\\..+$", "", gene_list_up)
+
+# Tentar a conversão novamente usando os IDs simplificados
+gene_list_up_entrez = AnnotationDbi::select(org.Hs.eg.db, 
+                      keys = gene_list_up_simplified, 
+                      columns = "ENTREZID", 
+                      keytype = "ENSEMBL")
+
+# Verificar os resultados da conversão
+head(gene_list_up_entrez)
+
+
+```
+
+```{r}
+library(clusterProfiler)
+
+# Realizar a análise de enriquecimento para os genes up-regulated
+enrich_res_up <- enrichGO(gene          = gene_list_up_entrez$ENTREZID,
+                          OrgDb         = org.Hs.eg.db,
+                          keyType       = "ENTREZID",
+                          ont           = "BP",
+                          pAdjustMethod = "BH",
+                          qvalueCutoff  = 0.05
+                          )
+
+# Verificar os resultados da análise de enriquecimento
+if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
+  print(as.data.frame(enrich_res_up))
+} else {
+  print("No significant enrichment found.")
+}
+
+```
+
+#### Resultados de Enriquecimento
+
+```{r}
+# Visualizar os resultados de enriquecimento se houver dados significativos
+if (!is.null(enrich_res_up) && nrow(enrich_res_up) > 0) {
+  library(enrichplot)
+  dotplot(enrich_res_up) + ggtitle("Enrichment Results for Up-Regulated Genes")
+} else {
+  print("No significant enrichment to plot.")
+}
+```
+
+##### Interpretação dos Resultados de Enriquecimento
+
+A análise do gráfico indica que os termos de enriquecimento mais relevantes estão ligados à resposta imune e à sinalização celular, sugerindo que esses processos desempenham um papel crucial no desenvolvimento do cancro urotelial. ´
+Destacam-se termos como regulação da via de sinalização da resposta imune, quimiotaxia e migração mediada por quimiocinas de leucócitos, indicando a importância da ativação do sistema imune e da migração celular na progressão do cancro. 
+Esses resultados fornecem insights valiosos sobre os processos biológicos subjacentes à doença, podendo auxiliar na identificação de novos alvos terapêuticos e no desenvolvimento de estratégias de tratamento mais eficazes.
+
+```{r}
+# Transformação de dados de contagem
+vsd = varianceStabilizingTransformation(dds, blind = FALSE) 
+
+# Heatmap de distâncias entre amostras
+# Calcular a distância entre as amostras
+sampleDists <- dist(t(assay(vsd)))
+
+# Heatmap contendo as distâncias Euclideanas entre as amostras calculadas a partir da transformação VST
+#pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, col = colors)
+pheatmap(sampleDists, col = heat.colors(10))
+```
+
+## PCA ploting
+
+```{r}
+# Função para gerar PCA plots corrigida
+
+# Carregar os dados
+bladder_numeric <- bladder_clin
+
+# Encontrar colunas categóricas com mais de 1 nível
+cat_cols <- sapply(bladder_numeric, is.factor)
+
+# Filtrar as colunas categóricas problemáticas corretamente
+cat_cols_filtered <- names(bladder_numeric)[cat_cols & sapply(bladder_numeric[, cat_cols], function(col) {
+  n_unique <- length(unique(na.omit(col)))
+  n_unique > 1
+})]
+
+# Criar um novo dataframe apenas com as colunas filtradas corretamente
+filtered_data <- bladder_numeric[, cat_cols_filtered]
+
+# Codificação One-Hot para as colunas categóricas restantes
+dummy_model <- dummyVars(~ ., data = filtered_data)
+bladder_numeric_dummy <- predict(dummy_model, filtered_data)
+
+# Combina as colunas categóricas codificadas com as numéricas
+numeric_cols <- bladder_numeric[, sapply(bladder_numeric, is.numeric)]
+final_data <- cbind(numeric_cols, bladder_numeric_dummy)
+
+# Verifica se final_data tem colunas numéricas
+if (length(which(sapply(final_data, is.numeric))) < 2) {
+  stop("Final_data doesn't have enough numeric columns for PCA.")
+}
+
+# Verificar se o conjunto de dados contém dados suficientes
+if (ncol(final_data) == 0 || nrow(final_data) == 0) {
+  stop("Final_data is empty or doesn't contain any data.")
+}
+
+columns_coded <- c("FRACTION_GENOME_ALTERED", "MUTATION_COUNT", "PRIOR_DX.No", "AGE")
+
+plot_pca <- function(data, group_var, title) {
+    print(paste("Processing", group_var))
+    
+    if (!group_var %in% colnames(data)) {
+        stop(paste("Coluna", group_var, "não encontrada nos dados"))
+    }
+    
+    if (all(is.na(data[[group_var]]))) {
+        stop(paste("Coluna", group_var, "contém apenas valores NA"))
+    }
+    
+    pca <- prcomp(data[, !names(data) %in% group_var], scale. = TRUE)
+    pca_data <- data.frame(pca$x[, 1:2], Group = data[[group_var]])
+    
+    print(head(pca_data))  # Para verificar os primeiros resultados
+    
+    plot <- ggplot(pca_data, aes(x = PC1, y = PC2, color = Group)) +
+        geom_point(size = 3) +
+        ggtitle(title) +
+        theme_minimal()
+    
+    print(plot)
+}
+
+# Gerar gráficos de PCA para cada coluna
+plots <- lapply(columns_coded, function(col) {
+    tryCatch({
+        print(paste("Generating PCA for", col))
+        plot_pca(final_data, col, paste("PCA para", col))
+    }, error = function(e) {
+        message(paste("Erro ao processar", col, ":", e$message))
+        NULL
+    })
+})
+
+```
+
+```{r}
+
+# Filtrar dados numéricos e tratar valores NA
+numeric_cols <- bladder_numeric[, sapply(bladder_numeric, is.numeric)]
+filtered_data <- na.omit(scale(numeric_cols))  # Escalar todos os dados numéricos
+
+# Reduzir a dimensionalidade usando UMAP
+umap_result <- umap(filtered_data)
+umap_data <- as.data.frame(umap_result$layout)
+colnames(umap_data) <- c("UMAP1", "UMAP2")
+
+# Aplicar K-means clustering nos dados reduzidos
+set.seed(42)
+kmeans_result <- kmeans(umap_data, centers = 3)  # Ajustar o número de clusters conforme necessário
+
+# Adicionar resultados de clusterização ao data frame
+umap_data$Cluster <- as.factor(kmeans_result$cluster)
+
+# Visualizar os clusters no espaço UMAP
+ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster)) +
+  geom_point(size = 3) +
+  ggtitle("Clusters in UMAP space") +
+  theme_minimal()
+
+```
+
+# Realização do Clustering hierárquico
+
+```{r}
+# Loading das libraries
+library(ggplot2)
+library(stats)
+
+# Função para plotar o dendograma
+my.plot.hc <- function(hclust, lab = 1:length(hclust$order),
+                       lab.col = rep(1, length(hclust$order)),
+                       hang = 0.1, ...) {
+  y <- rep(hclust$height, 2)
+  x <- as.numeric(hclust$merge)
+  y <- y[which(x < 0)]
+  x <- x[which(x < 0)]
+  x <- abs(x)
+  y <- y[order(x)]
+  x <- x[order(x)]
+  plot(hclust, labels = FALSE, hang = hang, ...)
+  text(x = x, y = y[hclust$order] - (max(hclust$height) * hang),
+       labels = lab[hclust$order], col = lab.col[hclust$order],
+       srt = 90, adj = c(1, 0.5), xpd = NA, ...)
+}
+# Citação: Oliveira, M., Sousa, R., & Baptista, S. (2023). report.Rmd.
+# Extrair a matriz de expressão e os metadados
+expression_data <- as.data.frame(assay(data, "unstranded"))
+metadata <- colData(data)
+
+# Remover valores ausentes e calcular a variância dos genes
+expression_data <- na.omit(expression_data)
+variances <- apply(expression_data, 1, var)
+
+# Selecionar apenas os genes com maior variância
+top_genes <- order(variances, decreasing = TRUE)[1:1000]
+expression_data <- expression_data[top_genes, ]
+
+# Transpor os dados e normalizar
+expression_data <- t(expression_data)
+expression_data <- scale(expression_data)
+
+# Reduce dimensionality with PCA
+pca_result <- prcomp(expression_data, center = TRUE, scale. = TRUE)
+reduced_data <- pca_result$x[, 1:10]  # Selecting the first 10 PCs
+
+# Calculate distance matrix
+dist_pca <- dist(reduced_data, method = "manhattan")
+
+# Hierarchical Clustering
+cl_pca <- hclust(dist_pca, method = "average")
+
+# Plotar dendrograma
+my.plot.hc(cl_pca, lab.col = as.integer(metadata$ajcc_pathologic_stage) + 1, cex = 0.6)
+
+```
+
+## Machine Learning
+
+-Dividimos os dados em conjuntos de treino e teste com uma proporção de 70/30.
+-Convertemos a variável categórica ajcc_pathologic_stage em fator apenas para os dados de treino.
+-Verificamos se existem valores ausentes nos dados.
+-Selecionamos as colunas relevantes nos dados de treinamento e teste.
+-Padronizamos os dados.
+-Treinamos o modelo KNN usando validação cruzada com 5 folds.
+-Por fim avaliamos o modelo usando a matriz de confusão.
+
+```{r}
+# Carregar as bibliotecas necessárias
+library(ggplot2)
+library(caret)
+library(naivebayes)
+library(ROSE)
+library(party)
+```
+### Clustering de genes/amostras e redução de dimensionalidade
+```{r}
+# Executar PCA
+pca_result <- prcomp(expression_data, center = TRUE, scale. = TRUE)
+
+# Visualizar os componentes principais
+plot(pca_result, main = "PCA dos Dados de Expressão Gênica")
+```
+### Balanceamento e Modelagem
+Agora, aplicamos o balanceamento com ROSE e ajustamos o modelo Naive Bayes
+```{r}
+# Adicionar a variável de destino
+pca_data <- as.data.frame(pca_result$x[, 1:10])
+pca_data$ajcc_pathologic_stage <- metadata$ajcc_pathologic_stage
+
+# Filtrar para manter apenas duas classes da variável de destino
+target_classes <- c("Stage I", "Stage II")
+pca_data <- pca_data[pca_data$ajcc_pathologic_stage %in% target_classes, ]
+pca_data$ajcc_pathologic_stage <- factor(pca_data$ajcc_pathologic_stage)
+
+# Balancear os dados com ROSE
+balanced_data <- ROSE(ajcc_pathologic_stage ~ ., data = pca_data, seed = 42)$data
+
+# Treinar o modelo Naive Bayes com dados balanceados
+model_nb <- naivebayes::naive_bayes(ajcc_pathologic_stage ~ ., data = balanced_data, laplace = 1)
+
+# Fazer previsões nos dados de teste
+nb_pred <- predict(model_nb, newdata = pca_data)
+
+# Converter as previsões para fator com os mesmos níveis
+nb_pred <- factor(nb_pred, levels = levels(pca_data$ajcc_pathologic_stage))
+
+# Avaliar o modelo
+conf_matrix <- caret::confusionMatrix(nb_pred, pca_data$ajcc_pathologic_stage)
+print(conf_matrix)
+
+```
+
+```{r}
+# Carregar bibliotecas necessárias
+library(caret)
+library(e1071)
+library(nnet)
+
+# Selecionar características bioinformaticamente significativas
+selected_features <- c("age_at_diagnosis", "tumor_grade", "primary_diagnosis",
+                       "ajcc_pathologic_t", "ajcc_pathologic_n", "ajcc_pathologic_stage")
+
+# Limpar metadados removendo linhas com destino em falta e selecionando colunas relevantes
+metadata_clean <- metadata[complete.cases(metadata$ajcc_pathologic_stage), selected_features, drop = FALSE]
+
+# Converter destino em fator
+metadata_clean$ajcc_pathologic_stage <- as.factor(metadata_clean$ajcc_pathologic_stage)
+
+# Divisão de Treino-Teste
+set.seed(123)
+train_indices <- createDataPartition(metadata_clean$ajcc_pathologic_stage, p = 0.7, list = FALSE)
+trainData <- metadata_clean[train_indices, ]
+testData <- metadata_clean[-train_indices, ]
+
+```
+## Declaração Justificativa:
+Apesar dos nossos esforços para completar este trabalho com sucesso não fomos bem sucedidos, dividimos os dados em treino e teste, padronizando-os, convertendo variáveis, treinando e avaliando modelos KNN e Naive Bayes, calculando métricas de desempenho, e trabalhando com árvores de decisão e regressão - obtivemos um loop de erros no processamento das variaveis para analise que nos impediu de prosseguir e originou novo atraso. Assim, consultámos trabalhos externos e colegas de outros grupos. Aproveitámos o código encontrado no repositório de Mariana Oliveira, Rui Sousa e Samuel Baptista, e com o seu consentimento, usamos para estruturar e concluir a parte de "Realização do Clustering hierárquico" e seguintes tópicos, estão citados no código como comentário. Entretanto, mais proximo da data de entrega novo erro surgiu levando a esta última versão deste trabalho...
+
+### Bibliografia
+
+Dobruch, J., & Oszczudłowski, M. (2021). Bladder Cancer: Current
+Challenges and Future Directions. Medicina (Kaunas, Lithuania), 57(8).
+<https://doi.org/10.3390/MEDICINA57080749>
+
+Dyrskjøt, L., Hansel, D. E., Efstathiou, J. A., Knowles, M. A., Galsky,
+M. D., Teoh, J., & Theodorescu, D. (2023). Bladder cancer. Nature
+Reviews. Disease Primers, 9(1).
+<https://doi.org/10.1038/S41572-023-00468-9>
+
+Oliveira, M., Sousa, R., & Baptista, S. (2023). report.Rmd. Recuperado de https://github.com/mariana-olivetree/Extracao/blob/main/report.Rmd
+
+\`\`\`{r}
